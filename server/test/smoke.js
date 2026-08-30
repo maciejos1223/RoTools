@@ -1,6 +1,8 @@
 import { generateModel } from '../tools/generateModel.js';
 import { exportModel } from '../tools/exportModel.js';
+import { outputDir } from '../config.js';
 import fs from 'node:fs';
+import path from 'node:path';
 
 const code = `
 const geo = new THREE.IcosahedronGeometry(1.5, 4);
@@ -26,7 +28,7 @@ console.log('export gltf:', e2.files, fs.statSync(e2.files[0]).size, 'bytes');
 console.log('export obj:', e3.files, fs.statSync(e3.files[0]).size, 'bytes');
 
 // validate GLB structure
-const glbPath = r.exported.glb.replace('/api/models/', './exports/models/').replace('/file.glb', '.glb');
+const glbPath = path.join(outputDir(), 'models', `${r.modelId}.glb`);
 const buf = fs.readFileSync(glbPath);
 const magic = buf.readUInt32LE(0);
 const jsonLen = buf.readUInt32LE(12);

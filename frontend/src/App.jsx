@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAppState } from './api.js';
 import { useI18n } from './i18n.jsx';
 import ModelViewer from './components/ModelViewer.jsx';
@@ -5,7 +6,8 @@ import AssetList from './components/AssetList.jsx';
 import SfxPanel from './components/SfxPanel.jsx';
 import ActivityLog from './components/ActivityLog.jsx';
 import Toasts from './components/Toasts.jsx';
-import { Blocks, Wifi, WifiOff, MonitorPlay, MonitorX, Radio, RadioTower, Languages } from 'lucide-react';
+import SettingsModal from './components/SettingsModal.jsx';
+import { Blocks, Wifi, WifiOff, MonitorPlay, MonitorX, Radio, RadioTower, Languages, Settings } from 'lucide-react';
 
 function StatusPill({ icon: Icon, label, ok, detail, pulse }) {
   return (
@@ -41,6 +43,7 @@ function LanguageToggle() {
 export default function App() {
   const { state, connected } = useAppState();
   const { t } = useI18n();
+  const [showSettings, setShowSettings] = useState(false);
 
   const robloxOnline = state?.roblox?.online;
 
@@ -60,6 +63,13 @@ export default function App() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            className="btn !px-2.5 !py-1.5"
+            title={t('settings.title')}
+            onClick={() => setShowSettings(true)}
+          >
+            <Settings size={14} />
+          </button>
           <LanguageToggle />
           <StatusPill
             icon={connected ? Radio : RadioTower}
@@ -106,6 +116,8 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
 
       <Toasts />
     </div>

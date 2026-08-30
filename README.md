@@ -102,6 +102,15 @@ Claude calls `generate_model` → the 3D preview appears at http://localhost:789
 
 Google keys can be created at [Google AI Studio](https://aistudio.google.com/apikey).
 
+### In-app settings
+
+You don't have to edit `config.json` by hand — click the **gear icon** in the frontend header:
+
+- edit **all** config values (API keys, providers, models, port, export dir),
+- API key inputs show `••••last4` when set; typing a new value replaces it, **Clear** resets it,
+- **Test** buttons verify the ElevenLabs / Google keys against the real API,
+- everything is saved to `server/config.json`; provider/model changes apply immediately (port and output dir need a server restart).
+
 ## Roblox Studio plugin
 
 1. Copy `roblox-plugin/RobloxMCPPlugin.lua` to:
@@ -125,6 +134,7 @@ Imported models appear as a `Model` in Workspace (MeshParts, Y-up, 1:1 scale wit
 
 ```bash
 node server/test/smoke.js   # sandbox + GLB/GLTF/OBJ writers
+node server/test/config.js  # settings API (masking, patching, key guard)
 node server/test/e2e.js     # full flow: MCP client → generate → accept → import → export
 ```
 

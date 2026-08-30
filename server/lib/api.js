@@ -3,7 +3,7 @@ import cors from 'cors';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadConfig, outputDir } from '../config.js';
+import { loadConfig, outputDir, maskConfig, saveConfigPatch } from '../config.js';
 import { activity, broadcast, publicState, state } from './state.js';
 import { queueImport, takeJob, completeJob } from './roblox.js';
 import { getModel } from './modelStore.js';
@@ -33,6 +33,62 @@ export function createApi() {
 
   /* ---------- state ---------- */
   app.get('/api/state', (_req, res) => res.json(publicState()));
+
+  /* ---------- settings ---------- */
+  app.get('/api/config', (_req, res) => res.json(maskConfig()));
+
+  app.post('/api/config', (req, res) => {
+    try {
+      const patch = req.body || {};
+      // guard: never accept masked placeholder values as real keys
+      for (const section of ['sfx', 'music']) {
+        if (patch[section]) {
+          for (const key of ['api_key', 'google_api_key']) {
+            if (typeof patch[section][key] === 'string' && patch[section][key].startsWith('•')) {
+              delete patch[section][key];
+            }
+          }
+        }
+      }
+      saveConfigPatch(patch);
+      activity('server', 'Settings updated via frontend', 'info');
+      res.json({ ok: true, config: maskConfig() });
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  });
+
+  app.post('/api/config/test', async (req, res) => {
+    const cfg = loadConfig();
+    const section = req.body?.section;
+    try {
+      if (section === 'sfx') {
+        const key = cfg.sfx.provider === 'google'
+          ? cfg.sfx.google_api_key || cfg.sfx.api_key || process.env.GEMINI_API_KEY
+          : cfg.sfx.api_key || process.env.ELEVENLABS_API_KEY;
+        if (!key) return res.json({ ok: false, message: 'No API key set' });
+        if (cfg.sfx.provider === 'google') {
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1`, { headers: { 'x-goog-api-key': key } });
+          return res.json(r.ok ? { ok: true, message: 'Google API key works' } : { ok: false, message: `Google API error ${r.status}` });
+        }
+        if (cfg.sfx.provider === 'elevenlabs') {
+          const r = await fetch('https://api.elevenlabs.io/v1/user', { headers: { 'xi-api-key': key } });
+          return res.json(r.ok ? { ok: true, message: 'ElevenLabs key works' } : { ok: false, message: `ElevenLabs error ${r.status}` });
+        }
+        return res.json({ ok: false, message: 'No test available for custom provider' });
+      }
+      if (section === 'music') {
+        const key = cfg.music.api_key || cfg.sfx.google_api_key || process.env.GEMINI_API_KEY;
+        if (!key) return res.json({ ok: false, message: 'No Google API key set' });
+        if (cfg.music.provider === 'custom') return res.json({ ok: false, message: 'No test available for custom provider' });
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.music.model)}?`, { headers: { 'x-goog-api-key': key } });
+        return res.json(r.ok ? { ok: true, message: `Key works, model "${cfg.music.model}" reachable` } : { ok: false, message: `Google API error ${r.status} (model ${cfg.music.model})` });
+      }
+      res.status(400).json({ error: 'section must be "sfx" or "music"' });
+    } catch (err) {
+      res.json({ ok: false, message: err.message });
+    }
+  });
 
   /* ---------- pending model actions ---------- */
   app.post('/api/models/:id/accept', (req, res) => {
