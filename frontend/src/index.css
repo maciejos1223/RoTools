@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", ui-monospace, monospace;
+  --color-ink: #05060b;
+  --color-panel: rgba(255, 255, 255, 0.028);
+  --color-edge: rgba(255, 255, 255, 0.07);
+  --color-accent: #7c5cff;
+  --color-accent2: #22d3ee;
+  --color-good: #34d399;
+  --color-warn: #fbbf24;
+  --color-bad: #f87171;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-ink);
+  color: #e7e9ee;
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+/* ambient background glow */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1100px 500px at 12% -10%, rgba(124, 92, 255, 0.13), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(34, 211, 238, 0.07), transparent 55%),
+    radial-gradient(700px 600px at 50% 120%, rgba(124, 92, 255, 0.05), transparent 60%);
+  z-index: 0;
+}
+
+/* subtle grid texture */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, black 30%, transparent 100%);
+  z-index: 0;
+}
+
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-edge);
+  border-radius: 1rem;
+  backdrop-filter: blur(12px);
+}
+
+.glow-accent {
+  box-shadow: 0 0 24px -6px rgba(124, 92, 255, 0.45);
+}
+
+.text-gradient {
+  background: linear-gradient(100deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  transition: all 0.18s ease;
+  border: 1px solid var(--color-edge);
+  color: #d6d9e0;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.btn:hover { background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.14); }
+.btn:active { transform: translateY(1px) scale(0.99); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: linear-gradient(120deg, #7c5cff, #5e8bff);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 20px -6px rgba(124, 92, 255, 0.6);
+}
+.btn-primary:hover { background: linear-gradient(120deg, #8d70ff, #6e99ff); }
+
+.btn-good {
+  background: linear-gradient(120deg, #10b981, #34d399);
+  border-color: transparent;
+  color: #052018;
+  box-shadow: 0 4px 20px -6px rgba(52, 211, 153, 0.55);
+}
+.btn-good:hover { filter: brightness(1.08); }
+
+.btn-bad {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.25);
+  color: #fca5a5;
+}
+.btn-bad:hover { background: rgba(248, 113, 113, 0.2); }
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+  background: rgba(124, 92, 255, 0.12);
+  border: 1px solid rgba(124, 92, 255, 0.3);
+  color: #c4b5fd;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip:hover { background: rgba(124, 92, 255, 0.25); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.09); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.25s ease both; }
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  50% { opacity: 0.75; box-shadow: 0 0 0 5px rgba(52, 211, 153, 0); }
+}
+.dot-live { animation: pulseDot 2s ease infinite; }

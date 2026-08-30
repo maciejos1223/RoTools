@@ -1,0 +1,23 @@
+{
+  "name": "roblox-mcp-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MCP server + frontend for generating 3D models & SFX and importing them into Roblox Studio",
+  "workspaces": [
+    "server",
+    "frontend"
+  ],
+  "scripts": {
+    "setup": "npm install",
+    "dev": "concurrently -n server,web -c magenta,cyan \"npm run dev -w server\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w frontend",
+    "start": "npm run start -w server",
+    "mcp": "npm run mcp -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

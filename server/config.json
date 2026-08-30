@@ -1,0 +1,14 @@
+{
+  "port": 7890,
+  "roblox_plugin_port": 7890,
+  "sfx": {
+    "provider": "elevenlabs",
+    "api_key": "",
+    "endpoint": "",
+    "model": "eleven_multilingual_v2"
+  },
+  "export": {
+    "default_format": "gltf",
+    "output_dir": "./exports"
+  }
+}
