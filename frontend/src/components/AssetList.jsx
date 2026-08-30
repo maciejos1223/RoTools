@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Copy, Check, Download, Cuboid, Send, Loader2, PackageCheck } from 'lucide-react';
 import { api } from '../api.js';
+import { useI18n } from '../i18n.jsx';
 import { toast, showToastError } from '../toast.js';
 
 function CopyChip({ id }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -17,7 +19,7 @@ function CopyChip({ id }) {
       ta.remove();
     }
     setCopied(true);
-    toast(`Copied ${id}`, 'info');
+    toast(`${t('assets.toastCopied')} ${id}`, 'info');
     setTimeout(() => setCopied(false), 1500);
   };
   return (
@@ -29,14 +31,15 @@ function CopyChip({ id }) {
 }
 
 export default function AssetList({ assets }) {
+  const { t } = useI18n();
   const [importing, setImporting] = useState(null);
 
   const importToStudio = async (asset) => {
     setImporting(asset.id);
-    toast(`Sending "${asset.name}" to Roblox Studio...`, 'info');
+    toast(t('assets.toastSending'), 'info');
     try {
       await api(`/api/assets/${asset.id}/import`, { method: 'POST' });
-      toast('Queued — Roblox Studio plugin will pick it up', 'success');
+      toast(t('assets.toastQueued'), 'success');
     } catch (err) {
       showToastError(err);
     } finally {
@@ -48,7 +51,7 @@ export default function AssetList({ assets }) {
     <div className="panel flex min-h-0 flex-col">
       <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
         <div className="flex items-center gap-2 text-[13px] font-semibold">
-          <Cuboid size={15} className="text-violet-300" /> Assets
+          <Cuboid size={15} className="text-violet-300" /> {t('assets.title')}
           <span className="rounded-full bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px] text-white/50">
             {assets.length}
           </span>
@@ -57,7 +60,7 @@ export default function AssetList({ assets }) {
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
         {assets.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs text-white/35">
-            Accepted models land here with their asset ID.
+            {t('assets.empty')}
           </p>
         ) : (
           <ul className="space-y-1.5">
@@ -69,7 +72,7 @@ export default function AssetList({ assets }) {
                       <span className="truncate text-[13px] font-medium text-white/90">{a.name}</span>
                       {a.imported ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-300">
-                          <PackageCheck size={10} /> in studio
+                          <PackageCheck size={10} /> {t('assets.inStudio')}
                         </span>
                       ) : null}
                     </div>
@@ -89,17 +92,17 @@ export default function AssetList({ assets }) {
                         title="Import into Roblox Studio"
                       >
                         {importing === a.id ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
-                        Import
+                        {t('assets.import')}
                       </button>
                     )}
                     <a className="btn !px-2.5 !py-1.5 !text-[11px]" href={a.glbUrl} download={`${a.name}.glb`}>
-                      <Download size={12} /> GLB
+                      <Download size={12} /> {t('assets.download')}
                     </a>
                   </div>
                 </div>
                 {a.robloxRef && (
                   <div className="mt-1.5 font-mono text-[10px] text-emerald-300/70">
-                    Workspace: {a.robloxRef}
+                    {t('assets.workspace')}: {a.robloxRef}
                   </div>
                 )}
               </li>

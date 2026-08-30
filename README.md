@@ -1,6 +1,6 @@
 # RoTools — Roblox MCP Tool
 
-Narzędzie działające jako **MCP serwer** dla Claude'a, które daje mu dostęp do generowania modeli 3D, dźwięku SFX oraz automatycznego importu assetów do Roblox Studio — plus lokalny **frontend z podglądem 3D** (dark sleek UI) na żywo.
+An **MCP server** for Claude that provides 3D model generation, AI audio (SFX, voice lines, music) and automatic asset import into Roblox Studio — plus a local **web dashboard with a live 3D preview** (dark sleek UI, EN/PL).
 
 ```
 Claude (MCP Client)
@@ -8,53 +8,51 @@ Claude (MCP Client)
 RoTools Server (Node.js)  ──→  http://localhost:7890  ←──  Frontend (React + three.js)
         │                                   ↑ poll /roblox/next
         │                                   ↓ POST /roblox/result
-        └── Roblox Studio Plugin (Lua)  →  EditableMesh → MeshPart w Workspace
+        └── Roblox Studio Plugin (Lua)  →  EditableMesh → MeshPart in Workspace
 ```
 
-## Komponenty
+## Components
 
-| Katalog | Opis |
+| Directory | Description |
 |---|---|
-| `server/` | MCP server (stdio) + HTTP API + SSE live events + GLB/OBJ writer (bez zależności DOM) |
-| `frontend/` | Vite + React + Tailwind v4 + react-three-fiber — podgląd modeli, akcje, log aktywności |
-| `roblox-plugin/` | Plugin do Roblox Studio (Lua) — poll importów, budowa MeshParts |
+| `server/` | MCP server (stdio) + HTTP API + SSE live events + GLB/OBJ writers (no DOM dependencies) |
+| `frontend/` | Vite + React + Tailwind v4 + react-three-fiber — model preview, review actions, live activity log |
+| `roblox-plugin/` | Roblox Studio plugin (Lua) — polls for imports, builds MeshParts |
 
-## Toole MCP
+## MCP Tools
 
-| Tool | Opis |
+| Tool | Description |
 |---|---|
-| `generate_model` | Wykonuje kod Three.js Claude'a w sandboxie Node, eksportuje GLB + OBJ, ustawia model jako *pending* do review |
-| `export_model` | Eksport ostatniego modelu do `.glb` / `.gltf` / `.obj`(+`.mtl`) w `exports/` |
-| `generate_sfx` | Prompt → SFX API (ElevenLabs lub własny REST), plik audio w `exports/sfx/` |
-| `import_to_roblox` | Kolejkuje import do Roblox Studio (plugin odbiera i buduje meshe), czeka na wynik |
-| `get_status` | Status serwera: plugin Studio, pending model, assety, aktywność |
+| `generate_model` | Executes Claude's Three.js code headlessly, exports GLB + OBJ, sets the model as *pending* for review |
+| `export_model` | Exports the latest model to `.glb` / `.gltf` / `.obj`(+`.mtl`) into `exports/` |
+| `generate_sfx` | Prompt → audio. `kind`: **sfx** (ElevenLabs / custom), **voice** (Google Gemini TTS), **music** (Google Lyria) |
+| `import_to_roblox` | Queues the import for the Roblox Studio plugin (rebuilds it as MeshParts) and waits for the result |
+| `get_status` | Server status: Studio plugin, pending model, assets, recent activity |
 
-## Instalacja
+## Installation
 
 ```bash
 npm install        # root (workspaces: server + frontend)
 ```
 
-Wymagania: **Node.js ≥ 20**.
+Requires **Node.js ≥ 20**.
 
-## Uruchomienie
+## Running
 
 ```bash
 npm run dev        # server (http://localhost:7890) + frontend (Vite, http://localhost:5173)
 ```
 
-Produkcyjnie:
+Production:
 
 ```bash
-npm run build      # buduje frontend/dist
-npm start          # server serwuje zbudowany frontend na http://localhost:7890
+npm run build      # builds frontend/dist
+npm start          # server serves the built frontend at http://localhost:7890
 ```
 
-> Po restarcie serwera frontend dev powinien się sam podłączyć (SSE + polling).
+## Connecting to Claude Desktop
 
-## Podłączenie do Claude Desktop
-
-W `claude_desktop_config.json` (Settings → Developer → Edit Config):
+In `claude_desktop_config.json` (Settings → Developer → Edit Config):
 
 ```json
 {
@@ -67,57 +65,72 @@ W `claude_desktop_config.json` (Settings → Developer → Edit Config):
 }
 ```
 
-Restart Claude Desktop — ikona RoTools pojawi się wśród narzędzi. Od tej pory możesz np.:
+Restart Claude Desktop and try:
 
-> „Zrób mi skałę z teksturą i zaimportuj do Studio"
+> "Make me a mossy rock with textures and import it into Studio"
 
-Claude wywoła `generate_model` → w przeglądarce (http://localhost:7890) pojawi się podgląd 3D → klikasz **Accept / Reject / Regenerate** → `import_to_roblox` wstawia model do Studia.
+Claude calls `generate_model` → the 3D preview appears at http://localhost:7890 → click **Accept / Reject / Regenerate** → `import_to_roblox` builds the model in Studio.
 
-## Konfiguracja SFX
+## Audio providers (SFX / Voice / Music)
 
 `server/config.json`:
 
 ```json
 {
-  "port": 7890,
   "sfx": {
     "provider": "elevenlabs",
-    "api_key": "twoj-klucz",
-    "model": "eleven_multilingual_v2"
+    "api_key": "your-elevenlabs-key",
+    "google_api_key": "your-gemini-key",
+    "voice": "Kore",
+    "model": "gemini-3.1-flash-tts-preview"
+  },
+  "music": {
+    "provider": "google",
+    "model": "lyria-3-clip-preview",
+    "api_key": ""
   },
   "export": { "default_format": "gltf", "output_dir": "./exports" }
 }
 ```
 
-Wspierane: `elevenlabs` (Sound Generation API) oraz `custom` (dowolny REST: POST JSON `{prompt, duration}` → audio binary; ustaw `sfx.endpoint`).
+| kind | Provider | API key source |
+|---|---|---|
+| `sfx` | `elevenlabs` (Sound Generation) | `sfx.api_key` or `ELEVENLABS_API_KEY` |
+| `sfx` | `google` (Gemini TTS — stylized voice lines) | `sfx.google_api_key` or `GEMINI_API_KEY` |
+| `music` | `google` (Lyria 3 — full music tracks, 44.1 kHz stereo MP3) | `music.api_key`, `sfx.google_api_key` or `GEMINI_API_KEY` |
+| any | `custom` (any REST endpoint: POST JSON `{prompt, duration}` → audio bytes) | `sfx.endpoint` / `music.endpoint` + optional Bearer key |
 
-## Instalacja pluginu Roblox Studio
+Google keys can be created at [Google AI Studio](https://aistudio.google.com/apikey).
 
-1. Skopiuj `roblox-plugin/RobloxMCPPlugin.lua` do:
+## Roblox Studio plugin
+
+1. Copy `roblox-plugin/RobloxMCPPlugin.lua` to:
    `%LOCALAPPDATA%\Roblox\Plugins\RobloxMCPPlugin.lua`
-2. Zrestartuj Studio — plugin **auto-startuje** i pokaże się przycisk *RoTools* na toolbarze (klik = on/off).
-3. Jeśli poprosi: włącz **Allow HTTP Requests** (Game Settings → Security) oraz beta **EditableMesh** (File → Beta Features).
-4. W nagłówku frontendu kapsuła **Roblox Studio** zaświeci się na zielono, gdy plugin się połączy.
+2. Restart Studio — the plugin **auto-starts** and adds a *RoTools* toolbar button (click to toggle).
+3. If prompted: enable **Allow HTTP Requests** (Game Settings → Security) and the **EditableMesh** beta (File → Beta Features).
+4. The **Roblox Studio** status pill in the frontend turns green once the plugin connects.
 
-Przy imporcie model pojawia się jako `Model` w Workspace (MeshParts, Y-up, skala 1:1 z podglądem).
+Imported models appear as a `Model` in Workspace (MeshParts, Y-up, 1:1 scale with the preview).
 
-## Frontend — co gdzie
+## Frontend overview
 
-- **Podgląd 3D** — orbit, auto-rotate, toggle tekstur/wireframe; dolny panel **Accept / Reject / Regenerate** (Reject/Regenerate przyjmują feedback dla Claude'a).
-- **Assets** — zaakceptowane modele z ID do skopiowania, przycisk **Import** do Studia, download GLB.
-- **Sound FX** — odtwarzacz wygenerowanych dźwięków + ręczne generowanie z promptu.
-- **Activity** — log na żywo (SSE) wszystkiego, co się dzieje: generacje, review, importy, połączenia pluginu.
-- Kapsuły statusu: **Live** (SSE), **API**, **Roblox Studio** (plugin).
+- **3D preview** — orbit, auto-rotate, texture/wireframe toggles; bottom panel with **Accept / Reject / Regenerate** (Reject/Regenerate accept optional feedback for Claude).
+- **Assets** — accepted models with copyable IDs, **Import** to Studio, GLB download.
+- **Sound FX** — player for generated audio (SFX / Voice / Music tabs) + manual generation form.
+- **Activity** — live (SSE) log of everything: generations, reviews, imports, plugin connections.
+- **Status pills**: Live (SSE), API, Roblox Studio (plugin).
+- **Language**: EN / PL toggle in the header (persisted in localStorage).
 
-## Testy
+## Tests
 
 ```bash
 node server/test/smoke.js   # sandbox + GLB/GLTF/OBJ writers
-node server/test/e2e.js     # pełny przepływ: MCP client → generate → accept → import → export
+node server/test/e2e.js     # full flow: MCP client → generate → accept → import → export
 ```
 
-## Uwagi
+## Notes
 
-- Studio **nie może nasłuchiwać HTTP**, więc to plugin *polluje* serwer (`GET /roblox/next` co 1.5 s) — import zadziała, dopóki Studio jest otwarte.
-- Tekstury są generowane proceduralnie (bez Canvas/DOM) i wpiekane do GLB jako PNG — działa też w viewerze.
-- `import_to_roblox` czeka max 2 min na plugin; jeśli Studio jest zamknięte, tool zwróci stosowny błąd.
+- Studio **cannot listen on HTTP**, so the plugin *polls* the server (`GET /roblox/next` every 1.5 s) — imports only work while Studio is open.
+- Textures are generated procedurally (no Canvas/DOM) and baked into the GLB as PNGs — they also render in the viewer.
+- `import_to_roblox` waits up to 2 minutes for the plugin; if Studio is closed the tool returns a clear error.
+- Google audio: TTS returns 24 kHz PCM (wrapped to WAV by the server), Lyria returns MP3 directly.

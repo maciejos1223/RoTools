@@ -1,10 +1,11 @@
 import { useAppState } from './api.js';
+import { useI18n } from './i18n.jsx';
 import ModelViewer from './components/ModelViewer.jsx';
 import AssetList from './components/AssetList.jsx';
 import SfxPanel from './components/SfxPanel.jsx';
 import ActivityLog from './components/ActivityLog.jsx';
 import Toasts from './components/Toasts.jsx';
-import { Blocks, Wifi, WifiOff, MonitorPlay, MonitorX, Radio, RadioTower } from 'lucide-react';
+import { Blocks, Wifi, WifiOff, MonitorPlay, MonitorX, Radio, RadioTower, Languages } from 'lucide-react';
 
 function StatusPill({ icon: Icon, label, ok, detail, pulse }) {
   return (
@@ -23,8 +24,23 @@ function StatusPill({ icon: Icon, label, ok, detail, pulse }) {
   );
 }
 
+function LanguageToggle() {
+  const { lang, setLang } = useI18n();
+  return (
+    <button
+      className="btn !px-2.5 !py-1.5 !text-[11px] font-semibold"
+      title="Switch language / Zmień język"
+      onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
+    >
+      <Languages size={13} />
+      {lang.toUpperCase()}
+    </button>
+  );
+}
+
 export default function App() {
   const { state, connected } = useAppState();
+  const { t } = useI18n();
 
   const robloxOnline = state?.roblox?.online;
 
@@ -40,28 +56,29 @@ export default function App() {
             <div className="text-[15px] font-bold leading-tight">
               Ro<span className="text-gradient">Tools</span>
             </div>
-            <div className="text-[10px] font-medium tracking-wide text-white/35">ROBLOX MCP STUDIO</div>
+            <div className="text-[10px] font-medium tracking-wide text-white/35">{t('app.subtitle')}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <StatusPill
             icon={connected ? Radio : RadioTower}
-            label="Live"
+            label={t('status.live')}
             ok={connected}
-            detail={connected ? 'SSE event stream connected' : 'Event stream disconnected — is the server running?'}
+            detail={connected ? t('status.liveOk') : t('status.liveErr')}
             pulse
           />
           <StatusPill
             icon={connected ? Wifi : WifiOff}
-            label="API"
+            label={t('status.api')}
             ok={!!state}
-            detail={state ? `Server up since ${new Date(state.startedAt).toLocaleTimeString()}` : 'Server offline — run: npm run dev'}
+            detail={state ? t('status.apiOk') : t('status.apiErr')}
           />
           <StatusPill
             icon={robloxOnline ? MonitorPlay : MonitorX}
-            label="Roblox Studio"
+            label={t('status.roblox')}
             ok={!!robloxOnline}
-            detail={robloxOnline ? 'Plugin connected' : 'Plugin offline — open Studio with the RoTools plugin'}
+            detail={robloxOnline ? t('status.robloxOk') : t('status.robloxErr')}
             pulse
           />
         </div>

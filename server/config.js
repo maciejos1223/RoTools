@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 const DEFAULTS = {
   port: 7890,
   roblox_plugin_port: 7890,
-  sfx: { provider: 'elevenlabs', api_key: '', endpoint: '', model: 'eleven_multilingual_v2' },
+  sfx: { provider: 'elevenlabs', api_key: '', google_api_key: '', endpoint: '', voice: 'Kore', model: 'gemini-3.1-flash-tts-preview' },
+  music: { provider: 'google', model: 'lyria-3-clip-preview', api_key: '', endpoint: '' },
   export: { default_format: 'gltf', output_dir: './exports' },
 };
 
@@ -23,6 +24,7 @@ export function loadConfig() {
     ...DEFAULTS,
     ...fileCfg,
     sfx: { ...DEFAULTS.sfx, ...(fileCfg.sfx || {}) },
+    music: { ...DEFAULTS.music, ...(fileCfg.music || {}) },
     export: { ...DEFAULTS.export, ...(fileCfg.export || {}) },
   };
   return cached;

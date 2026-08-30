@@ -4,8 +4,16 @@
   "sfx": {
     "provider": "elevenlabs",
     "api_key": "",
+    "google_api_key": "",
     "endpoint": "",
-    "model": "eleven_multilingual_v2"
+    "voice": "Kore",
+    "model": "gemini-3.1-flash-tts-preview"
+  },
+  "music": {
+    "provider": "google",
+    "model": "lyria-3-clip-preview",
+    "api_key": "",
+    "endpoint": ""
   },
   "export": {
     "default_format": "gltf",

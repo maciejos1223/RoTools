@@ -119,9 +119,9 @@ export function createApi() {
   /* ---------- sfx ---------- */
   app.post('/api/sfx', async (req, res) => {
     try {
-      const { prompt, duration, name } = req.body || {};
+      const { prompt, duration, name, kind } = req.body || {};
       if (!prompt) return res.status(400).json({ error: 'prompt required' });
-      const record = await generateSfx({ prompt, duration, name });
+      const record = await generateSfx({ prompt, duration, name, kind });
       if (!state.sfx.find((s) => s.id === record.id)) state.sfx.unshift(record);
       res.json({ ok: true, sfx: record });
     } catch (err) {

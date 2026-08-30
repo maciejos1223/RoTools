@@ -62,16 +62,22 @@ export async function startMcp() {
   server.registerTool(
     'generate_sfx',
     {
-      title: 'Generate SFX',
-      description: 'Generate a sound effect from a text prompt using the configured SFX API (ElevenLabs by default). The file is saved and playable in the local frontend.',
+      title: 'Generate SFX / Music',
+      description:
+        'Generate audio from a text prompt. kind="sfx": sound effects via ElevenLabs (or configured provider). kind="voice": stylized spoken lines / character voice via Google Gemini TTS. kind="music": actual music tracks (instrumentals, songs with vocals) via Google Lyria. The file is saved and playable in the local frontend.',
       inputSchema: {
-        prompt: z.string().describe('Description of the sound, e.g. "deep cinematic explosion with debris"'),
-        duration: z.number().optional().describe('Duration in seconds (0.5-22)'),
+        prompt: z
+          .string()
+          .describe(
+            'Description of the audio. For sfx: "deep cinematic explosion with debris". For voice: "An old wizard says cheerfully: Welcome, traveler!". For music: "Upbeat chiptune boss battle theme, fast tempo"'
+          ),
+        kind: z.enum(['sfx', 'voice', 'music']).optional().default('sfx').describe('Type of audio to generate'),
+        duration: z.number().optional().describe('Duration in seconds (sfx only, 0.5-22)'),
         name: z.string().optional().describe('Short file name'),
       },
     },
-    async ({ prompt, duration, name }) => {
-      const r = await generateSfxTool({ prompt, duration, name });
+    async ({ prompt, duration, name, kind }) => {
+      const r = await generateSfxTool({ prompt, duration, name, kind: kind || 'sfx' });
       return { content: [{ type: 'text', text: r.resultText }], isError: false };
     }
   );

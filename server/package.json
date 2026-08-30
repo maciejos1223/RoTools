@@ -10,6 +10,7 @@
     "mcp": "node mcp.js"
   },
   "dependencies": {
+    "@google/genai": "^2.19.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "cors": "^2.8.5",
     "express": "^4.21.2",
