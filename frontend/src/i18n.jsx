@@ -10,8 +10,6 @@ const dict = {
       activity: 'Activity',
     },
     audio: { pageDesc: 'Generate sound effects, voice lines and music — or ask Claude.' },
-    assets: { pageDesc: 'Accepted models with their asset IDs.', },
-    log: { pageDesc: 'Everything happening on the server, live.', },
     status: {
       live: 'Live',
       liveOk: 'SSE event stream connected',
@@ -45,6 +43,7 @@ const dict = {
       toastRegenerating: 'Regenerating model...',
     },
     assets: {
+      pageDesc: 'Accepted models with their asset IDs.',
       title: 'Assets',
       empty: 'Accepted models land here with their asset ID.',
       import: 'Import',
@@ -71,6 +70,7 @@ const dict = {
       kindMusic: 'Music',
     },
     log: {
+      pageDesc: 'Everything happening on the server, live.',
       title: 'Activity',
       empty: '— no activity yet —',
       clear: 'Clear',
@@ -116,8 +116,6 @@ const dict = {
       activity: 'Aktywność',
     },
     audio: { pageDesc: 'Generuj efekty dźwiękowe, głosy i muzykę — albo poproś Claude.' },
-    assets: { pageDesc: 'Zaakceptowane modele wraz z ich ID.' },
-    log: { pageDesc: 'Wszystko, co dzieje się na serwerze — na żywo.' },
     status: {
       live: 'Na żywo',
       liveOk: 'Strumień zdarzeń (SSE) połączony',
@@ -151,6 +149,7 @@ const dict = {
       toastRegenerating: 'Generowanie ponownie...',
     },
     assets: {
+      pageDesc: 'Zaakceptowane modele wraz z ich ID.',
       title: 'Assety',
       empty: 'Zaakceptowane modele pojawią się tutaj wraz z ich ID.',
       import: 'Importuj',
@@ -177,6 +176,7 @@ const dict = {
       kindMusic: 'Muzyka',
     },
     log: {
+      pageDesc: 'Wszystko, co dzieje się na serwerze — na żywo.',
       title: 'Aktywność',
       empty: '— brak aktywności —',
       clear: 'Wyczyść',
