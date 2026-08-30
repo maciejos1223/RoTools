@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, Download, Cuboid, Send, Loader2, PackageCheck } from 'lucide-react';
+import { Copy, Check, Download, Send, Loader2, PackageCheck } from 'lucide-react';
 import { api } from '../api.js';
 import { useI18n } from '../i18n.jsx';
 import { toast, showToastError } from '../toast.js';
@@ -23,8 +23,8 @@ function CopyChip({ id }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <button className="chip inline-flex items-center gap-1" onClick={copy} title="Copy asset ID">
-      {copied ? <Check size={11} /> : <Copy size={11} />}
+    <button className="chip" onClick={copy} title="Copy asset ID">
+      {copied ? <Check size={10} className="text-[var(--ok)]" /> : <Copy size={10} />}
       {id}
     </button>
   );
@@ -49,44 +49,38 @@ export default function AssetList({ assets }) {
 
   return (
     <div className="panel flex min-h-0 flex-col">
-      <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
-        <div className="flex items-center gap-2 text-[13px] font-semibold">
-          <Cuboid size={15} className="text-violet-300" /> {t('assets.title')}
-          <span className="rounded-full bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px] text-white/50">
-            {assets.length}
-          </span>
-        </div>
+      <div className="panel-header">
+        <div className="panel-title">{t('assets.title')}</div>
+        <span className="mono text-[10.5px] text-[var(--text-3)]">{assets.length}</span>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
         {assets.length === 0 ? (
-          <p className="px-2 py-6 text-center text-xs text-white/35">
-            {t('assets.empty')}
-          </p>
+          <p className="px-3 py-6 text-center text-[12px] text-[var(--text-3)]">{t('assets.empty')}</p>
         ) : (
-          <ul className="space-y-1.5">
+          <ul className="space-y-1">
             {assets.map((a) => (
-              <li key={a.id} className="fade-up group rounded-xl border border-white/[0.05] bg-white/[0.02] p-2.5 transition hover:border-white/[0.1] hover:bg-white/[0.045]">
+              <li key={a.id} className="fade-up rounded-lg border border-transparent p-2.5 transition hover:border-[var(--line)] hover:bg-[var(--surface-2)]">
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="truncate text-[13px] font-medium text-white/90">{a.name}</span>
-                      {a.imported ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-300">
-                          <PackageCheck size={10} /> {t('assets.inStudio')}
+                      <span className="truncate text-[12.5px] font-medium text-[var(--text)]">{a.name}</span>
+                      {a.imported && (
+                        <span className="badge flex items-center gap-1 border border-[rgba(70,194,133,0.3)] text-[var(--ok)]">
+                          <PackageCheck size={9} /> {t('assets.inStudio')}
                         </span>
-                      ) : null}
+                      )}
                     </div>
-                    <div className="mt-1 flex items-center gap-2">
+                    <div className="mt-1.5 flex items-center gap-2">
                       <CopyChip id={a.id} />
-                      <span className="font-mono text-[10px] text-white/30">
+                      <span className="mono text-[10px] text-[var(--text-3)]">
                         {new Date(a.createdAt).toLocaleTimeString()}
                       </span>
                     </div>
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <div className="flex shrink-0 gap-1.5">
                     {!a.imported && (
                       <button
-                        className="btn btn-primary !px-2.5 !py-1.5 !text-[11px]"
+                        className="btn btn-primary btn-sm"
                         disabled={importing === a.id}
                         onClick={() => importToStudio(a)}
                         title="Import into Roblox Studio"
@@ -95,14 +89,14 @@ export default function AssetList({ assets }) {
                         {t('assets.import')}
                       </button>
                     )}
-                    <a className="btn !px-2.5 !py-1.5 !text-[11px]" href={a.glbUrl} download={`${a.name}.glb`}>
+                    <a className="btn btn-sm" href={a.glbUrl} download={`${a.name}.glb`}>
                       <Download size={12} /> {t('assets.download')}
                     </a>
                   </div>
                 </div>
                 {a.robloxRef && (
-                  <div className="mt-1.5 font-mono text-[10px] text-emerald-300/70">
-                    {t('assets.workspace')}: {a.robloxRef}
+                  <div className="mono mt-1.5 text-[10px] text-[var(--text-3)]">
+                    {t('assets.workspace')}: <span className="text-[var(--ok)]">{a.robloxRef}</span>
                   </div>
                 )}
               </li>

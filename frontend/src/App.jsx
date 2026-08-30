@@ -7,21 +7,15 @@ import SfxPanel from './components/SfxPanel.jsx';
 import ActivityLog from './components/ActivityLog.jsx';
 import Toasts from './components/Toasts.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
-import { Blocks, Wifi, WifiOff, MonitorPlay, MonitorX, Radio, RadioTower, Languages, Settings } from 'lucide-react';
+import { Settings, Languages } from 'lucide-react';
 
-function StatusPill({ icon: Icon, label, ok, detail, pulse }) {
+function StatusItem({ label, ok, detail, pulse }) {
   return (
-    <div
-      title={detail}
-      className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium transition ${
-        ok
-          ? 'border-emerald-400/25 bg-emerald-400/[0.08] text-emerald-200'
-          : 'border-white/10 bg-white/[0.03] text-white/40'
-      }`}
-    >
-      <span className={`h-[7px] w-[7px] rounded-full ${ok ? (pulse ? 'dot-live bg-emerald-400' : 'bg-emerald-400') : 'bg-white/20'}`} />
-      <Icon size={13} />
-      {label}
+    <div className="flex items-center gap-1.5" title={detail}>
+      <span className={`dot ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} />
+      <span className={ok ? 'text-[12px] text-[var(--text-2)]' : 'text-[12px] text-[var(--text-3)]'}>
+        {label}
+      </span>
     </div>
   );
 }
@@ -30,11 +24,10 @@ function LanguageToggle() {
   const { lang, setLang } = useI18n();
   return (
     <button
-      className="btn !px-2.5 !py-1.5 !text-[11px] font-semibold"
+      className="btn btn-icon btn-ghost !text-[10px] font-semibold mono"
       title="Switch language / Zmień język"
       onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
     >
-      <Languages size={13} />
       {lang.toUpperCase()}
     </button>
   );
@@ -48,77 +41,50 @@ export default function App() {
   const robloxOnline = state?.roblox?.online;
 
   return (
-    <div className="relative z-10 flex h-full flex-col">
+    <div className="flex h-full flex-col">
       {/* header */}
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-3 backdrop-blur">
-        <div className="flex items-center gap-3">
-          <div className="glow-accent flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 text-white">
-            <Blocks size={18} />
-          </div>
-          <div>
-            <div className="text-[15px] font-bold leading-tight">
-              Ro<span className="text-gradient">Tools</span>
-            </div>
-            <div className="text-[10px] font-medium tracking-wide text-white/35">{t('app.subtitle')}</div>
-          </div>
+      <header className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--line)] px-4">
+        <div className="flex items-center gap-2.5">
+          <span className="h-2 w-2 rounded-full bg-[var(--primary)]" />
+          <span className="text-[13.5px] font-semibold tracking-tight">RoTools</span>
+          <span className="text-[11px] text-[var(--text-3)]">{t('app.subtitle')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="btn !px-2.5 !py-1.5"
-            title={t('settings.title')}
-            onClick={() => setShowSettings(true)}
-          >
+        <div className="flex items-center gap-4">
+          <StatusItem label={t('status.live')} ok={connected} detail={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
+          <StatusItem label={t('status.api')} ok={!!state} detail={state ? t('status.apiOk') : t('status.apiErr')} />
+          <StatusItem label={t('status.roblox')} ok={!!robloxOnline} detail={robloxOnline ? t('status.robloxOk') : t('status.robloxErr')} pulse />
+          <div className="mx-1 h-4 w-px bg-[var(--line)]" />
+          <button className="btn btn-icon btn-ghost" title={t('settings.title')} onClick={() => setShowSettings(true)}>
             <Settings size={14} />
           </button>
           <LanguageToggle />
-          <StatusPill
-            icon={connected ? Radio : RadioTower}
-            label={t('status.live')}
-            ok={connected}
-            detail={connected ? t('status.liveOk') : t('status.liveErr')}
-            pulse
-          />
-          <StatusPill
-            icon={connected ? Wifi : WifiOff}
-            label={t('status.api')}
-            ok={!!state}
-            detail={state ? t('status.apiOk') : t('status.apiErr')}
-          />
-          <StatusPill
-            icon={robloxOnline ? MonitorPlay : MonitorX}
-            label={t('status.roblox')}
-            ok={!!robloxOnline}
-            detail={robloxOnline ? t('status.robloxOk') : t('status.robloxErr')}
-            pulse
-          />
         </div>
       </header>
 
       {/* main */}
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-[1fr_360px]">
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 lg:grid-cols-[1fr_340px]">
         {/* left column */}
-        <div className="flex min-h-0 flex-col gap-4">
-          <div className="min-h-[46%] flex-1">
+        <div className="flex min-h-0 flex-col gap-3">
+          <div className="min-h-0 flex-1">
             <ModelViewer pendingModel={state?.pendingModel || null} />
           </div>
-          <div className="h-[220px] shrink-0">
+          <div className="h-[200px] shrink-0">
             <ActivityLog activity={state?.activity || []} onClear={() => {}} />
           </div>
         </div>
 
         {/* right column */}
-        <div className="flex min-h-0 flex-col gap-4 overflow-y-auto pr-0.5 lg:max-h-full">
-          <div className="min-h-[190px] flex-[1.2]">
+        <div className="flex min-h-0 flex-col gap-3">
+          <div className="min-h-[180px] flex-[1.2]">
             <AssetList assets={state?.assets || []} />
           </div>
-          <div className="min-h-[260px] flex-1">
+          <div className="min-h-[240px] flex-1">
             <SfxPanel sfxList={state?.sfx || []} />
           </div>
         </div>
       </main>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
-
       <Toasts />
     </div>
   );

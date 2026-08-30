@@ -3,7 +3,7 @@ import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, Grid, ContactShadows, Center, Bounds, useProgress } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {
-  Box, Eye, EyeOff, RotateCw, Loader2, PackageOpen, Check, X, RefreshCw,
+  Box, Eye, EyeOff, RotateCw, Loader2, Check, X, RefreshCw,
 } from 'lucide-react';
 import { api } from '../api.js';
 import { useI18n } from '../i18n.jsx';
@@ -48,7 +48,7 @@ function Rig({ autoRotate }) {
       ref={controls}
       makeDefault
       autoRotate={autoRotate}
-      autoRotateSpeed={1.2}
+      autoRotateSpeed={1.1}
       enableDamping
       dampingFactor={0.08}
       minDistance={0.5}
@@ -85,57 +85,28 @@ export default function ModelViewer({ pendingModel }) {
   };
 
   return (
-    <div className="panel relative h-full min-h-[420px] overflow-hidden">
-      {/* toolbar */}
-      <div className="absolute right-3 top-3 z-10 flex gap-1.5">
-        <ToolbarBtn active={showTextures} onClick={() => setShowTextures((v) => !v)} title={t('viewer.textures')}>
-          {showTextures ? <Eye size={15} /> : <EyeOff size={15} />}
-        </ToolbarBtn>
-        <ToolbarBtn active={wireframe} onClick={() => setWireframe((v) => !v)} title={t('viewer.wireframe')}>
-          <Box size={15} />
-        </ToolbarBtn>
-        <ToolbarBtn active={autoRotate} onClick={() => setAutoRotate((v) => !v)} title={t('viewer.autorotate')}>
-          <RotateCw size={15} />
-        </ToolbarBtn>
-      </div>
-
-      {/* header info */}
-      {pendingModel && (
-        <div className="absolute left-4 top-3 z-10">
-          <div className="text-[13px] font-semibold text-white/90">{pendingModel.name}</div>
-          <div className="font-mono text-[10px] text-white/40">
-            {pendingModel.stats.objects} {t('viewer.meshes')} · {pendingModel.stats.triangles.toLocaleString()} {t('viewer.tris')} ·
-            {' '}{pendingModel.stats.size.x}×{pendingModel.stats.size.y}×{pendingModel.stats.size.z}
-          </div>
-        </div>
-      )}
-
+    <div className="panel relative h-full min-h-[380px] overflow-hidden">
       {url ? (
         <Canvas shadows dpr={[1, 2]} camera={{ position: [4.5, 3, 4.5], fov: 42 }}>
-          <color attach="background" args={['#07080f']} />
-          <fog attach="fog" args={['#07080f', 18, 42]} />
+          <color attach="background" args={['#0e1014']} />
+          <fog attach="fog" args={['#0e1014', 20, 46]} />
           <ambientLight intensity={0.55} />
-          <directionalLight
-            position={[5, 8, 4]}
-            intensity={1.6}
-            castShadow
-            shadow-mapSize={[1024, 1024]}
-          />
-          <pointLight position={[-6, 3, -4]} intensity={12} color="#7c5cff" />
-          <pointLight position={[6, 2, -6]} intensity={10} color="#22d3ee" />
+          <directionalLight position={[5, 8, 4]} intensity={1.5} castShadow shadow-mapSize={[1024, 1024]} />
+          <pointLight position={[-6, 3, -4]} intensity={10} color="#8b93f8" />
+          <pointLight position={[6, 2, -6]} intensity={8} color="#5ac8e8" />
           <Suspense fallback={null}>
             <Model url={url} showTextures={showTextures} wireframe={wireframe} />
           </Suspense>
-          <ContactShadows position={[0, -0.01, 0]} opacity={0.55} scale={22} blur={2.4} far={9} />
+          <ContactShadows position={[0, -0.01, 0]} opacity={0.5} scale={22} blur={2.4} far={9} />
           <Grid
             position={[0, -0.002, 0]}
             args={[40, 40]}
             cellSize={0.6}
             cellThickness={0.6}
-            cellColor="#1c2030"
+            cellColor="#1d2028"
             sectionSize={3}
             sectionThickness={1}
-            sectionColor="#2a3050"
+            sectionColor="#2a2e3a"
             fadeDistance={34}
             fadeStrength={1.4}
             infiniteGrid
@@ -146,12 +117,33 @@ export default function ModelViewer({ pendingModel }) {
         <EmptyState />
       )}
 
+      {/* top-left model info */}
+      {pendingModel && url && (
+        <div className="pointer-events-none absolute left-3.5 top-3">
+          <div className="text-[12.5px] font-medium text-[var(--text)]">{pendingModel.name}</div>
+          <div className="mono text-[10.5px] text-[var(--text-3)]">
+            {pendingModel.stats.objects} {t('viewer.meshes')} · {pendingModel.stats.triangles.toLocaleString()} {t('viewer.tris')} ·
+            {' '}{pendingModel.stats.size.x}×{pendingModel.stats.size.y}×{pendingModel.stats.size.z}
+          </div>
+        </div>
+      )}
+
+      {/* toolbar */}
+      <div className="absolute right-3 top-3 flex gap-0.5 rounded-lg border border-[var(--line)] bg-[var(--bg)]/80 p-0.5 backdrop-blur-sm">
+        <ToolBtn active={showTextures} onClick={() => setShowTextures((v) => !v)} title={t('viewer.textures')}>
+          {showTextures ? <Eye size={14} /> : <EyeOff size={14} />}
+        </ToolBtn>
+        <ToolBtn active={wireframe} onClick={() => setWireframe((v) => !v)} title={t('viewer.wireframe')}>
+          <Box size={14} />
+        </ToolBtn>
+        <ToolBtn active={autoRotate} onClick={() => setAutoRotate((v) => !v)} title={t('viewer.autorotate')}>
+          <RotateCw size={14} />
+        </ToolBtn>
+      </div>
+
       {url && <LoadingOverlay />}
 
-      {/* pending actions overlay */}
-      {pendingModel?.status === 'pending' && (
-        <PendingActions busy={busy} onAct={act} />
-      )}
+      {pendingModel?.status === 'pending' && <PendingActions busy={busy} onAct={act} />}
     </div>
   );
 }
@@ -161,23 +153,21 @@ function LoadingOverlay() {
   const { t } = useI18n();
   if (!active) return null;
   return (
-    <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#07080f]/50">
-      <div className="flex items-center gap-2 text-sm text-white/70">
-        <Loader2 size={16} className="animate-spin" /> {t('viewer.loading')}
+    <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[var(--bg)]/50">
+      <div className="flex items-center gap-2 text-[12.5px] text-[var(--text-2)]">
+        <Loader2 size={15} className="animate-spin" /> {t('viewer.loading')}
       </div>
     </div>
   );
 }
 
-function ToolbarBtn({ children, active, onClick, title }) {
+function ToolBtn({ children, active, onClick, title }) {
   return (
     <button
       title={title}
       onClick={onClick}
-      className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-all ${
-        active
-          ? 'border-violet-400/40 bg-violet-500/25 text-violet-200'
-          : 'border-white/10 bg-white/[0.04] text-white/50 hover:bg-white/10 hover:text-white/80'
+      className={`flex h-7 w-7 items-center justify-center rounded-md transition ${
+        active ? 'bg-[var(--surface-2)] text-[var(--text)]' : 'text-[var(--text-3)] hover:text-[var(--text-2)]'
       }`}
     >
       {children}
@@ -197,8 +187,8 @@ function PendingActions({ busy, onAct }) {
   };
 
   return (
-    <div className="fade-up absolute bottom-4 left-1/2 z-20 w-[min(560px,92%)] -translate-x-1/2">
-      <div className="panel glow-accent p-3">
+    <div className="fade-up absolute bottom-3.5 left-1/2 z-20 w-[min(560px,92%)] -translate-x-1/2">
+      <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)]/95 p-2.5 shadow-xl backdrop-blur">
         {askFeedback && (
           <input
             autoFocus
@@ -206,27 +196,27 @@ function PendingActions({ busy, onAct }) {
             onChange={(e) => setFeedback(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && withFeedback('regenerate')}
             placeholder={t('viewer.feedbackPlaceholder')}
-            className="mb-2 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none placeholder:text-white/30 focus:border-violet-400/50"
+            className="input mb-2"
           />
         )}
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-white/50">
-            {t('viewer.hint')} <b className="text-white/80">{t('viewer.hintAssets')}</b>.
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[11.5px] text-[var(--text-3)]">
+            {t('viewer.hint')} <span className="text-[var(--text-2)]">{t('viewer.hintAssets')}</span>
           </span>
-          <div className="flex gap-2">
-            <button className="btn btn-bad" disabled={!!busy} onClick={() => withFeedback('reject')}>
-              <X size={14} /> {t('viewer.reject')}
+          <div className="flex gap-1.5">
+            <button className="btn btn-danger btn-sm" disabled={!!busy} onClick={() => withFeedback('reject')}>
+              <X size={13} /> {t('viewer.reject')}
             </button>
             <button
-              className="btn"
+              className="btn btn-sm"
               disabled={!!busy}
               onClick={() => (askFeedback ? withFeedback('regenerate') : setAskFeedback(true))}
             >
-              <RefreshCw size={14} className={busy === 'regenerate' ? 'animate-spin' : ''} />
+              <RefreshCw size={13} className={busy === 'regenerate' ? 'animate-spin' : ''} />
               {t('viewer.regenerate')}
             </button>
-            <button className="btn btn-good" disabled={!!busy} onClick={() => withFeedback('accept')}>
-              {busy === 'accept' ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+            <button className="btn btn-primary btn-sm" disabled={!!busy} onClick={() => withFeedback('accept')}>
+              {busy === 'accept' ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
               {t('viewer.accept')}
             </button>
           </div>
@@ -239,14 +229,14 @@ function PendingActions({ busy, onAct }) {
 function EmptyState() {
   const { t } = useI18n();
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-500/10 text-violet-300">
-        <PackageOpen size={30} strokeWidth={1.5} />
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 text-center">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--line)] text-[var(--text-3)]">
+        <Box size={20} strokeWidth={1.5} />
       </div>
       <div>
-        <div className="text-sm font-semibold text-white/80">{t('viewer.emptyTitle')}</div>
-        <div className="mt-1 max-w-[320px] text-xs leading-relaxed text-white/40">
-          {t('viewer.emptyDesc')} <span className="text-violet-300/90">{t('viewer.emptyExample')}</span>
+        <div className="text-[13px] font-medium text-[var(--text-2)]">{t('viewer.emptyTitle')}</div>
+        <div className="mx-auto mt-1 max-w-[340px] text-[12px] leading-relaxed text-[var(--text-3)]">
+          {t('viewer.emptyDesc')} <span className="text-[var(--text-2)]">{t('viewer.emptyExample')}</span>
           {t('viewer.emptySuffix')}
         </div>
       </div>
