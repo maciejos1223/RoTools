@@ -8,7 +8,7 @@ import ActivityLog from './components/ActivityLog.jsx';
 import Toasts from './components/Toasts.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
 import {
-  Box, Volume2, Package, ScrollText, Settings, Languages,
+  Box, Volume2, Package, ScrollText, Settings,
 } from 'lucide-react';
 
 const PAGES = [
@@ -23,12 +23,22 @@ function NavItem({ icon: Icon, label, active, onClick, badge }) {
     <button className={`nav-item ${active ? 'on' : ''}`} onClick={onClick}>
       <Icon size={16} className="shrink-0" style={active ? { color: 'var(--primary)' } : undefined} />
       <span className="flex-1">{label}</span>
-      {badge > 0 && (
-        <span className="mono rounded-md bg-[var(--bg)] px-1.5 py-0.5 text-[10.5px] text-[var(--text-2)]">
+      {badge && (
+        <span className="mono tnum rounded-md bg-[var(--surface-3)] px-1.5 py-0.5 text-[10.5px] leading-4 text-[var(--text-2)]">
           {badge}
         </span>
       )}
     </button>
+  );
+}
+
+function StatusRow({ label, ok, value, title, pulse }) {
+  return (
+    <div className="flex items-center gap-2.5 px-3 py-[7px]" title={title}>
+      <span className={`dot !h-[7px] !w-[7px] ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} />
+      <span className="text-[12px] text-[var(--text-2)]">{label}</span>
+      <span className="mono tnum ml-auto text-[11px] text-[var(--text-3)]">{value}</span>
+    </div>
   );
 }
 
@@ -44,20 +54,24 @@ export default function App() {
   const activity = state?.activity || [];
 
   const badges = { models: 0, audio: sfxList.length, assets: assets.length, activity: 0 };
+  const hasPending = pending?.status === 'pending';
 
   return (
     <div className="flex h-full">
       {/* ---------- sidebar ---------- */}
-      <aside className="flex w-[220px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
-        <div className="flex h-[60px] items-center gap-2.5 border-b border-[var(--line)] px-4">
-          <span className="h-2.5 w-2.5 rounded-md bg-[var(--primary)]" />
+      <aside className="flex w-[232px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
+        <div className="flex h-[62px] items-center gap-3 border-b border-[var(--line)] px-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
+            <Box size={15} className="text-white" strokeWidth={2.2} />
+          </div>
           <div className="leading-tight">
-            <div className="text-[14.5px] font-semibold tracking-tight">RoTools</div>
+            <div className="text-[14px] font-semibold tracking-tight">RoTools</div>
             <div className="text-[10.5px] text-[var(--text-3)]">{t('app.subtitle')}</div>
           </div>
         </div>
 
-        <nav className="flex flex-col gap-1 p-3">
+        <nav className="flex flex-1 flex-col gap-0.5 p-3">
+          <div className="nav-section section-label">{t('nav.workspace')}</div>
           {PAGES.map((p) => (
             <NavItem
               key={p.id}
@@ -65,35 +79,48 @@ export default function App() {
               label={t(p.labelKey)}
               active={page === p.id}
               onClick={() => setPage(p.id)}
-              badge={badges[p.id]}
+              badge={p.id === 'models' && hasPending ? t('nav.pending') : badges[p.id] > 0 ? badges[p.id] : null}
             />
           ))}
         </nav>
 
-        <div className="mt-auto flex flex-col gap-1 border-t border-[var(--line)] p-3">
-          <button className="nav-item" onClick={() => setShowSettings(true)}>
-            <Settings size={16} className="shrink-0" />
-            <span className="flex-1">{t('settings.title')}</span>
-          </button>
-          <button className="nav-item" onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}>
-            <Languages size={16} className="shrink-0" />
-            <span className="flex-1">{lang === 'en' ? 'Polski' : 'English'}</span>
-          </button>
-          <div className="mt-2 flex items-center justify-between px-3 py-1.5 text-[11px]">
-            <StatusDot label="API" ok={!!state} title={state ? t('status.apiOk') : t('status.apiErr')} />
-            <StatusDot label={t('status.live')} ok={connected} title={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
-            <StatusDot label={t('status.roblox')} ok={!!state?.roblox?.online} title={state?.roblox?.online ? t('status.robloxOk') : t('status.robloxErr')} pulse />
+        <div className="border-t border-[var(--line)] p-3">
+          <div className="rounded-xl border border-[var(--line)] bg-[var(--bg)] py-1">
+            <StatusRow label={t('status.api')} ok={!!state} value={state ? 'online' : 'offline'} title={state ? t('status.apiOk') : t('status.apiErr')} />
+            <StatusRow label="SSE" ok={connected} value={connected ? 'live' : 'offline'} title={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
+            <StatusRow label="Studio" ok={!!state?.roblox?.online} value={state?.roblox?.online ? 'connected' : 'offline'} title={state?.roblox?.online ? t('status.robloxOk') : t('status.robloxErr')} pulse />
+          </div>
+          <div className="mt-2.5 flex gap-1.5">
+            <button className="btn btn-sm flex-1" onClick={() => setShowSettings(true)}>
+              <Settings size={13} />
+              {t('settings.title')}
+            </button>
+            <button
+              className="btn btn-sm w-[38px] !px-0 mono !text-[11px]"
+              title="Switch language / Zmień język"
+              onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
+            >
+              {lang.toUpperCase()}
+            </button>
           </div>
         </div>
       </aside>
 
       {/* ---------- content ---------- */}
       <main className="min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto h-full p-4" style={{ maxWidth: 1400 }}>
+        <div className="mx-auto h-full p-5" style={{ maxWidth: 1400 }}>
           {page === 'models' && (
-            <div className="flex h-full min-h-0 flex-col gap-4">
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="mb-4 flex items-center justify-between">
+                <h1 className="text-[19px] font-semibold tracking-tight">{t('nav.models')}</h1>
+                {pending && (
+                  <span className={`badge border ${pending.status === 'pending' ? 'border-[rgba(110,121,244,0.4)] text-[var(--primary)]' : 'border-[var(--line)] text-[var(--text-3)]'}`}>
+                    {pending.status === 'pending' ? t('nav.pendingBadge') : pending.status}
+                  </span>
+                )}
+              </div>
               <ModelViewer pendingModel={pending || null} />
-              <div className="h-[240px] shrink-0">
+              <div className="mt-4 h-[220px] shrink-0">
                 <ActivityLog activity={activity} onClear={() => {}} />
               </div>
             </div>
@@ -110,21 +137,12 @@ export default function App() {
   );
 }
 
-function StatusDot({ label, ok, title, pulse }) {
-  return (
-    <div className="flex items-center gap-1.5" title={title}>
-      <span className={`dot !h-[7px] !w-[7px] ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} />
-      <span className={ok ? 'text-[var(--text-2)]' : 'text-[var(--text-3)]'}>{label}</span>
-    </div>
-  );
-}
-
 function PageHeader({ title, desc, children }) {
   return (
-    <div className="mb-4 flex items-end justify-between gap-4">
+    <div className="mb-5 flex items-end justify-between gap-4">
       <div>
-        <h1 className="text-[17px] font-semibold tracking-tight">{title}</h1>
-        {desc && <p className="mt-0.5 text-[12.5px] text-[var(--text-3)]">{desc}</p>}
+        <h1 className="text-[19px] font-semibold tracking-tight">{title}</h1>
+        {desc && <p className="mt-0.5 text-[13px] text-[var(--text-3)]">{desc}</p>}
       </div>
       {children}
     </div>

@@ -29,7 +29,7 @@ export default function Toasts() {
         return (
           <div
             key={item.id}
-            className="fade-up pointer-events-auto flex max-w-sm items-center gap-2.5 rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2.5 text-[12.5px] shadow-2xl"
+            className="fade-up pointer-events-auto flex max-w-sm items-center gap-2.5 rounded-xl border border-[var(--line)] bg-[var(--surface-2)] px-3.5 py-2.5 text-[12.5px] shadow-[var(--shadow-pop)]"
           >
             <Icon size={15} className="shrink-0" style={{ color: M.color }} />
             <span className="text-[var(--text)]">{item.message}</span>

@@ -4,10 +4,13 @@ const dict = {
   en: {
     app: { subtitle: 'ROBLOX MCP STUDIO' },
     nav: {
+      workspace: 'Workspace',
       models: '3D Models',
       audio: 'Audio',
       assets: 'Assets',
       activity: 'Activity',
+      pending: 'review',
+      pendingBadge: 'PENDING REVIEW',
     },
     audio: { pageDesc: 'Generate sound effects, voice lines and music — or ask Claude.' },
     status: {
@@ -110,10 +113,13 @@ const dict = {
   pl: {
     app: { subtitle: 'ROBLOX MCP STUDIO' },
     nav: {
+      workspace: 'Nawigacja',
       models: 'Modele 3D',
       audio: 'Audio',
       assets: 'Assety',
       activity: 'Aktywność',
+      pending: 'review',
+      pendingBadge: 'OCZEKUJE NA REVIEW',
     },
     audio: { pageDesc: 'Generuj efekty dźwiękowe, głosy i muzykę — albo poproś Claude.' },
     status: {
