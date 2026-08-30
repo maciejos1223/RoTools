@@ -3,6 +3,15 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const dict = {
   en: {
     app: { subtitle: 'ROBLOX MCP STUDIO' },
+    nav: {
+      models: '3D Models',
+      audio: 'Audio',
+      assets: 'Assets',
+      activity: 'Activity',
+    },
+    audio: { pageDesc: 'Generate sound effects, voice lines and music — or ask Claude.' },
+    assets: { pageDesc: 'Accepted models with their asset IDs.', },
+    log: { pageDesc: 'Everything happening on the server, live.', },
     status: {
       live: 'Live',
       liveOk: 'SSE event stream connected',
@@ -48,6 +57,7 @@ const dict = {
     },
     sfx: {
       title: 'Sound FX',
+      generated: 'Generated audio',
       placeholderSfx: "Describe a sound — e.g. 'sword clash, metallic'",
       placeholderVoice: "Describe a voice line — e.g. 'old wizard says: welcome, traveler'",
       placeholderMusic: "Describe a track — e.g. 'upbeat chiptune boss battle'",
@@ -99,6 +109,15 @@ const dict = {
   },
   pl: {
     app: { subtitle: 'ROBLOX MCP STUDIO' },
+    nav: {
+      models: 'Modele 3D',
+      audio: 'Audio',
+      assets: 'Assety',
+      activity: 'Aktywność',
+    },
+    audio: { pageDesc: 'Generuj efekty dźwiękowe, głosy i muzykę — albo poproś Claude.' },
+    assets: { pageDesc: 'Zaakceptowane modele wraz z ich ID.' },
+    log: { pageDesc: 'Wszystko, co dzieje się na serwerze — na żywo.' },
     status: {
       live: 'Na żywo',
       liveOk: 'Strumień zdarzeń (SSE) połączony',
@@ -144,6 +163,7 @@ const dict = {
     },
     sfx: {
       title: 'Dźwięki',
+      generated: 'Wygenerowane audio',
       placeholderSfx: "Opisz dźwięk — np. 'zderzenie mieczy, metaliczne'",
       placeholderVoice: "Opisz kwestię głosową — np. 'stary czarodziej mówi: witaj, wędrowcze'",
       placeholderMusic: "Opisz utwór — np. 'żywiołowy chiptune na walkę z bossem'",

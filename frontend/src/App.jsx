@@ -7,85 +7,162 @@ import SfxPanel from './components/SfxPanel.jsx';
 import ActivityLog from './components/ActivityLog.jsx';
 import Toasts from './components/Toasts.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
-import { Settings, Languages } from 'lucide-react';
+import {
+  Box, Volume2, Package, ScrollText, Settings, Languages,
+} from 'lucide-react';
 
-function StatusItem({ label, ok, detail, pulse }) {
-  return (
-    <div className="flex items-center gap-1.5" title={detail}>
-      <span className={`dot ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} />
-      <span className={ok ? 'text-[12px] text-[var(--text-2)]' : 'text-[12px] text-[var(--text-3)]'}>
-        {label}
-      </span>
-    </div>
-  );
-}
+const PAGES = [
+  { id: 'models', icon: Box, labelKey: 'nav.models' },
+  { id: 'audio', icon: Volume2, labelKey: 'nav.audio' },
+  { id: 'assets', icon: Package, labelKey: 'nav.assets' },
+  { id: 'activity', icon: ScrollText, labelKey: 'nav.activity' },
+];
 
-function LanguageToggle() {
-  const { lang, setLang } = useI18n();
+function NavItem({ icon: Icon, label, active, onClick, badge }) {
   return (
-    <button
-      className="btn btn-icon btn-ghost !text-[10px] font-semibold mono"
-      title="Switch language / Zmień język"
-      onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
-    >
-      {lang.toUpperCase()}
+    <button className={`nav-item ${active ? 'on' : ''}`} onClick={onClick}>
+      <Icon size={16} className="shrink-0" style={active ? { color: 'var(--primary)' } : undefined} />
+      <span className="flex-1">{label}</span>
+      {badge > 0 && (
+        <span className="mono rounded-md bg-[var(--bg)] px-1.5 py-0.5 text-[10.5px] text-[var(--text-2)]">
+          {badge}
+        </span>
+      )}
     </button>
   );
 }
 
 export default function App() {
   const { state, connected } = useAppState();
-  const { t } = useI18n();
+  const { t, lang, setLang } = useI18n();
+  const [page, setPage] = useState('models');
   const [showSettings, setShowSettings] = useState(false);
 
-  const robloxOnline = state?.roblox?.online;
+  const pending = state?.pendingModel;
+  const assets = state?.assets || [];
+  const sfxList = state?.sfx || [];
+  const activity = state?.activity || [];
+
+  const badges = { models: 0, audio: sfxList.length, assets: assets.length, activity: 0 };
 
   return (
-    <div className="flex h-full flex-col">
-      {/* header */}
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--line)] px-4">
-        <div className="flex items-center gap-2.5">
-          <span className="h-2 w-2 rounded-full bg-[var(--primary)]" />
-          <span className="text-[13.5px] font-semibold tracking-tight">RoTools</span>
-          <span className="text-[11px] text-[var(--text-3)]">{t('app.subtitle')}</span>
+    <div className="flex h-full">
+      {/* ---------- sidebar ---------- */}
+      <aside className="flex w-[220px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
+        <div className="flex h-[60px] items-center gap-2.5 border-b border-[var(--line)] px-4">
+          <span className="h-2.5 w-2.5 rounded-md bg-[var(--primary)]" />
+          <div className="leading-tight">
+            <div className="text-[14.5px] font-semibold tracking-tight">RoTools</div>
+            <div className="text-[10.5px] text-[var(--text-3)]">{t('app.subtitle')}</div>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <StatusItem label={t('status.live')} ok={connected} detail={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
-          <StatusItem label={t('status.api')} ok={!!state} detail={state ? t('status.apiOk') : t('status.apiErr')} />
-          <StatusItem label={t('status.roblox')} ok={!!robloxOnline} detail={robloxOnline ? t('status.robloxOk') : t('status.robloxErr')} pulse />
-          <div className="mx-1 h-4 w-px bg-[var(--line)]" />
-          <button className="btn btn-icon btn-ghost" title={t('settings.title')} onClick={() => setShowSettings(true)}>
-            <Settings size={14} />
+
+        <nav className="flex flex-col gap-1 p-3">
+          {PAGES.map((p) => (
+            <NavItem
+              key={p.id}
+              icon={p.icon}
+              label={t(p.labelKey)}
+              active={page === p.id}
+              onClick={() => setPage(p.id)}
+              badge={badges[p.id]}
+            />
+          ))}
+        </nav>
+
+        <div className="mt-auto flex flex-col gap-1 border-t border-[var(--line)] p-3">
+          <button className="nav-item" onClick={() => setShowSettings(true)}>
+            <Settings size={16} className="shrink-0" />
+            <span className="flex-1">{t('settings.title')}</span>
           </button>
-          <LanguageToggle />
-        </div>
-      </header>
-
-      {/* main */}
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 lg:grid-cols-[1fr_340px]">
-        {/* left column */}
-        <div className="flex min-h-0 flex-col gap-3">
-          <div className="min-h-0 flex-1">
-            <ModelViewer pendingModel={state?.pendingModel || null} />
-          </div>
-          <div className="h-[200px] shrink-0">
-            <ActivityLog activity={state?.activity || []} onClear={() => {}} />
+          <button className="nav-item" onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}>
+            <Languages size={16} className="shrink-0" />
+            <span className="flex-1">{lang === 'en' ? 'Polski' : 'English'}</span>
+          </button>
+          <div className="mt-2 flex items-center justify-between px-3 py-1.5 text-[11px]">
+            <StatusDot label="API" ok={!!state} title={state ? t('status.apiOk') : t('status.apiErr')} />
+            <StatusDot label={t('status.live')} ok={connected} title={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
+            <StatusDot label={t('status.roblox')} ok={!!state?.roblox?.online} title={state?.roblox?.online ? t('status.robloxOk') : t('status.robloxErr')} pulse />
           </div>
         </div>
+      </aside>
 
-        {/* right column */}
-        <div className="flex min-h-0 flex-col gap-3">
-          <div className="min-h-[180px] flex-[1.2]">
-            <AssetList assets={state?.assets || []} />
-          </div>
-          <div className="min-h-[240px] flex-1">
-            <SfxPanel sfxList={state?.sfx || []} />
-          </div>
+      {/* ---------- content ---------- */}
+      <main className="min-w-0 flex-1 overflow-y-auto">
+        <div className="mx-auto h-full p-4" style={{ maxWidth: 1400 }}>
+          {page === 'models' && (
+            <div className="flex h-full min-h-0 flex-col gap-4">
+              <ModelViewer pendingModel={pending || null} />
+              <div className="h-[240px] shrink-0">
+                <ActivityLog activity={activity} onClear={() => {}} />
+              </div>
+            </div>
+          )}
+          {page === 'audio' && <SfxPage sfxList={sfxList} />}
+          {page === 'assets' && <AssetsPage assets={assets} />}
+          {page === 'activity' && <ActivityPage activity={activity} />}
         </div>
       </main>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       <Toasts />
+    </div>
+  );
+}
+
+function StatusDot({ label, ok, title, pulse }) {
+  return (
+    <div className="flex items-center gap-1.5" title={title}>
+      <span className={`dot !h-[7px] !w-[7px] ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} />
+      <span className={ok ? 'text-[var(--text-2)]' : 'text-[var(--text-3)]'}>{label}</span>
+    </div>
+  );
+}
+
+function PageHeader({ title, desc, children }) {
+  return (
+    <div className="mb-4 flex items-end justify-between gap-4">
+      <div>
+        <h1 className="text-[17px] font-semibold tracking-tight">{title}</h1>
+        {desc && <p className="mt-0.5 text-[12.5px] text-[var(--text-3)]">{desc}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function SfxPage({ sfxList }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <PageHeader title={t('nav.audio')} desc={t('audio.pageDesc')} />
+      <div className="min-h-0 flex-1">
+        <SfxPanel sfxList={sfxList} />
+      </div>
+    </div>
+  );
+}
+
+function AssetsPage({ assets }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <PageHeader title={t('nav.assets')} desc={t('assets.pageDesc')} />
+      <div className="min-h-0 flex-1">
+        <AssetList assets={assets} />
+      </div>
+    </div>
+  );
+}
+
+function ActivityPage({ activity }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <PageHeader title={t('nav.activity')} desc={t('log.pageDesc')} />
+      <div className="min-h-0 flex-1">
+        <ActivityLog activity={activity} onClear={() => {}} full />
+      </div>
     </div>
   );
 }

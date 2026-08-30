@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, Download, Send, Loader2, PackageCheck } from 'lucide-react';
+import { Copy, Check, Download, Send, Loader2, PackageCheck, Cuboid } from 'lucide-react';
 import { api } from '../api.js';
 import { useI18n } from '../i18n.jsx';
 import { toast, showToastError } from '../toast.js';
@@ -24,7 +24,7 @@ function CopyChip({ id }) {
   };
   return (
     <button className="chip" onClick={copy} title="Copy asset ID">
-      {copied ? <Check size={10} className="text-[var(--ok)]" /> : <Copy size={10} />}
+      {copied ? <Check size={11} className="text-[var(--ok)]" /> : <Copy size={11} />}
       {id}
     </button>
   );
@@ -48,57 +48,61 @@ export default function AssetList({ assets }) {
   };
 
   return (
-    <div className="panel flex min-h-0 flex-col">
+    <div className="panel flex h-full min-h-0 flex-col">
       <div className="panel-header">
-        <div className="panel-title">{t('assets.title')}</div>
-        <span className="mono text-[10.5px] text-[var(--text-3)]">{assets.length}</span>
+        <div className="flex items-center gap-2">
+          <Cuboid size={15} className="text-[var(--text-3)]" />
+          <div className="panel-title">{t('assets.title')}</div>
+          <span className="mono text-[11.5px] text-[var(--text-3)]">{assets.length}</span>
+        </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto p-2">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {assets.length === 0 ? (
-          <p className="px-3 py-6 text-center text-[12px] text-[var(--text-3)]">{t('assets.empty')}</p>
+          <p className="px-4 py-12 text-center text-[13.5px] text-[var(--text-3)]">{t('assets.empty')}</p>
         ) : (
-          <ul className="space-y-1">
+          <ul className="space-y-2">
             {assets.map((a) => (
-              <li key={a.id} className="fade-up rounded-lg border border-transparent p-2.5 transition hover:border-[var(--line)] hover:bg-[var(--surface-2)]">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-[12.5px] font-medium text-[var(--text)]">{a.name}</span>
-                      {a.imported && (
-                        <span className="badge flex items-center gap-1 border border-[rgba(70,194,133,0.3)] text-[var(--ok)]">
-                          <PackageCheck size={9} /> {t('assets.inStudio')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      <CopyChip id={a.id} />
-                      <span className="mono text-[10px] text-[var(--text-3)]">
-                        {new Date(a.createdAt).toLocaleTimeString()}
+              <li
+                key={a.id}
+                className="fade-up flex items-center justify-between gap-4 rounded-lg border border-transparent px-4 py-3.5 transition hover:border-[var(--line)] hover:bg-[var(--surface-2)]"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2.5">
+                    <span className="truncate text-[14.5px] font-medium text-[var(--text)]">{a.name}</span>
+                    {a.imported && (
+                      <span className="badge flex items-center gap-1 border border-[rgba(76,199,138,0.35)] text-[var(--ok)]">
+                        <PackageCheck size={10} /> {t('assets.inStudio')}
                       </span>
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 gap-1.5">
-                    {!a.imported && (
-                      <button
-                        className="btn btn-primary btn-sm"
-                        disabled={importing === a.id}
-                        onClick={() => importToStudio(a)}
-                        title="Import into Roblox Studio"
-                      >
-                        {importing === a.id ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
-                        {t('assets.import')}
-                      </button>
                     )}
-                    <a className="btn btn-sm" href={a.glbUrl} download={`${a.name}.glb`}>
-                      <Download size={12} /> {t('assets.download')}
-                    </a>
+                  </div>
+                  <div className="mt-1.5 flex items-center gap-2.5">
+                    <CopyChip id={a.id} />
+                    <span className="mono text-[11px] text-[var(--text-3)]">
+                      {new Date(a.createdAt).toLocaleString()}
+                    </span>
+                    {a.robloxRef && (
+                      <span className="mono truncate text-[11px] text-[var(--text-3)]">
+                        {t('assets.workspace')}: <span className="text-[var(--ok)]">{a.robloxRef}</span>
+                      </span>
+                    )}
                   </div>
                 </div>
-                {a.robloxRef && (
-                  <div className="mono mt-1.5 text-[10px] text-[var(--text-3)]">
-                    {t('assets.workspace')}: <span className="text-[var(--ok)]">{a.robloxRef}</span>
-                  </div>
-                )}
+                <div className="flex shrink-0 gap-2">
+                  {!a.imported && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={importing === a.id}
+                      onClick={() => importToStudio(a)}
+                      title="Import into Roblox Studio"
+                    >
+                      {importing === a.id ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                      {t('assets.import')}
+                    </button>
+                  )}
+                  <a className="btn btn-sm" href={a.glbUrl} download={`${a.name}.glb`}>
+                    <Download size={13} /> {t('assets.download')}
+                  </a>
+                </div>
               </li>
             ))}
           </ul>

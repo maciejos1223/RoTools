@@ -9,6 +9,13 @@ const LEVEL_DOT = {
   error: 'bg-[var(--err)]',
 };
 
+const LEVEL_TEXT = {
+  info: 'text-[var(--text-2)]',
+  success: 'text-[var(--ok)]',
+  warn: 'text-[var(--warn)]',
+  error: 'text-[var(--err)]',
+};
+
 const TYPE_LABEL = {
   model: 'MODEL',
   sfx: 'AUDIO',
@@ -18,7 +25,7 @@ const TYPE_LABEL = {
   import: 'IMPORT',
 };
 
-export default function ActivityLog({ activity, onClear }) {
+export default function ActivityLog({ activity, onClear, full = false }) {
   const { t } = useI18n();
   const scrollRef = useRef(null);
 
@@ -28,33 +35,35 @@ export default function ActivityLog({ activity, onClear }) {
   }, [activity]);
 
   return (
-    <div className="panel flex min-h-0 flex-col">
-      <div className="panel-header" style={{ minHeight: 38 }}>
+    <div className="panel flex h-full min-h-0 flex-col">
+      <div className="panel-header">
         <div className="panel-title">{t('log.title')}</div>
         <button className="btn btn-icon btn-ghost" onClick={onClear} title={t('log.clear')}>
-          <Trash2 size={12} />
+          <Trash2 size={13} />
         </button>
       </div>
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
+      <div
+        ref={scrollRef}
+        className={`min-h-0 flex-1 overflow-y-auto ${full ? 'px-4 py-3' : 'px-3 py-2'}`}
+      >
         {activity.length === 0 ? (
-          <p className="py-3 text-center text-[11.5px] text-[var(--text-3)]">{t('log.empty')}</p>
+          <p className={`text-center text-[var(--text-3)] ${full ? 'py-10 text-[13px]' : 'py-3 text-[12px]'}`}>
+            {t('log.empty')}
+          </p>
         ) : (
           activity.map((a) => (
-            <div key={a.id} className="flex items-start gap-2 py-[2.5px] font-mono text-[10.5px] leading-relaxed">
-              <span className={`dot mt-[4px] !h-[5px] !w-[5px] ${LEVEL_DOT[a.level] || LEVEL_DOT.info}`} />
+            <div
+              key={a.id}
+              className={`flex items-start gap-2.5 font-mono leading-relaxed ${full ? 'py-1.5 text-[12px]' : 'py-[3px] text-[11px]'}`}
+            >
+              <span className={`dot mt-[5px] !h-[6px] !w-[6px] ${LEVEL_DOT[a.level] || LEVEL_DOT.info}`} />
               <span className="shrink-0 text-[var(--text-3)]">{new Date(a.at).toLocaleTimeString()}</span>
               {TYPE_LABEL[a.type] && (
-                <span className="shrink-0 text-[9px] font-semibold tracking-wider text-[var(--text-3)]">
+                <span className="w-[54px] shrink-0 text-[10px] font-semibold tracking-wider text-[var(--text-3)]">
                   {TYPE_LABEL[a.type]}
                 </span>
               )}
-              <span className={`min-w-0 break-words ${
-                a.level === 'error' ? 'text-[var(--err)]' :
-                a.level === 'success' ? 'text-[var(--ok)]' :
-                a.level === 'warn' ? 'text-[var(--warn)]' : 'text-[var(--text-2)]'
-              }`}>
-                {a.message}
-              </span>
+              <span className={`min-w-0 break-words ${LEVEL_TEXT[a.level] || LEVEL_TEXT.info}`}>{a.message}</span>
             </div>
           ))
         )}
