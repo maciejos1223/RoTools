@@ -3,12 +3,15 @@ import cors from 'cors';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { randomUUID } from 'node:crypto';
 import { loadConfig, outputDir, maskConfig, saveConfigPatch } from '../config.js';
 import { activity, broadcast, publicState, state } from './state.js';
 import { queueImport, takeJob, completeJob } from './roblox.js';
 import { getModel } from './modelStore.js';
 import { generateModel, regenerateModel } from '../tools/generateModel.js';
 import { generateSfx } from './sfx.js';
+import { createMcpServer } from '../mcpServer.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -29,6 +32,37 @@ export function createApi() {
     res.write(`event: hello\ndata: ${JSON.stringify({ type: 'hello' })}\n\n`);
     state.sseClients.add(res);
     req.on('close', () => state.sseClients.delete(res));
+  });
+
+  /* ---------- MCP over HTTP (any client: Cursor, opencode, Claude Code, …) ---------- */
+  const httpTransports = new Map();
+  app.all('/mcp', async (req, res) => {
+    try {
+      const sessionId = req.headers['mcp-session-id'];
+      if (!sessionId) {
+        // new session (initialize) — SDK assigns the session id
+        const transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: () => randomUUID(),
+          enableJsonResponse: true,
+          onsessioninitialized: (id) => httpTransports.set(id, transport),
+        });
+        transport.onclose = () => {
+          if (transport.sessionId) httpTransports.delete(transport.sessionId);
+        };
+        const server = createMcpServer();
+        await server.connect(transport);
+        await transport.handleRequest(req, res, req.body);
+        return;
+      }
+      const transport = httpTransports.get(sessionId);
+      if (!transport) {
+        return res.status(404).json({ jsonrpc: '2.0', error: { code: -32001, message: 'Session not found' }, id: null });
+      }
+      await transport.handleRequest(req, res, req.body);
+    } catch (err) {
+      console.error('MCP HTTP error:', err);
+      if (!res.headersSent) res.status(500).json({ jsonrpc: '2.0', error: { code: -32603, message: err.message }, id: null });
+    }
   });
 
   /* ---------- state ---------- */

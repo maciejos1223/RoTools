@@ -22,7 +22,7 @@ Example (rock):
   mesh.name = 'Rock';
   scene.add(mesh);`;
 
-export async function startMcp() {
+export function createMcpServer() {
   const server = new McpServer({ name: 'rotools', version: '1.0.0' });
 
   server.registerTool(
@@ -120,6 +120,12 @@ export async function startMcp() {
     }
   );
 
+  return server;
+}
+
+/** stdio transport (Claude Desktop & classic local MCP clients). */
+export async function startMcp() {
+  const server = createMcpServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error('RoTools MCP server connected (stdio)');

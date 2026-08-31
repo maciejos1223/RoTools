@@ -71,6 +71,42 @@ Restart Claude Desktop and try:
 
 Claude calls `generate_model` → the 3D preview appears at http://localhost:7890 → click **Accept / Reject / Regenerate** → `import_to_roblox` builds the model in Studio.
 
+## Connecting any other AI client
+
+The server speaks **standard MCP** over two transports:
+
+1. **stdio** — run `node D:\Roblox\RoTools\server\index.js` as the command (works with Claude Desktop, Cline, Continue, …)
+2. **Streamable HTTP** — point the client at `http://localhost:7890/mcp` (works with Cursor, opencode, Windsurf, Claude Code remote, …)
+
+Examples:
+
+**Cursor** (`~/.cursor/mcp.json`):
+```json
+{ "mcpServers": { "rotools": { "url": "http://localhost:7890/mcp" } } }
+```
+
+**Windsurf** (`~/.codeium/windsurf/mcp_config.json`):
+```json
+{ "mcpServers": { "rotools": { "serverUrl": "http://localhost:7890/mcp" } } }
+```
+
+**Cline** (VS Code settings → MCP Servers):
+```json
+{ "rotools": { "transportType": "http", "url": "http://localhost:7890/mcp" } }
+```
+
+**Claude Code** (terminal):
+```bash
+claude mcp add rotools --transport http http://localhost:7890/mcp
+```
+
+**opencode** (project `opencode.json` — already included in this repo):
+```json
+{ "mcp": { "rotools": { "type": "remote", "url": "http://localhost:7890/mcp", "enabled": true } } }
+```
+
+All clients get the same 5 tools; the frontend at http://localhost:7890 stays the review/dashboard layer regardless of which AI drives the server.
+
 ## Audio providers (SFX / Voice / Music)
 
 `server/config.json`:
@@ -135,6 +171,7 @@ Imported models appear as a `Model` in Workspace (MeshParts, Y-up, 1:1 scale wit
 ```bash
 node server/test/smoke.js   # sandbox + GLB/GLTF/OBJ writers
 node server/test/config.js  # settings API (masking, patching, key guard)
+node server/test/http-mcp.js # MCP over Streamable HTTP (URL transport)
 node server/test/e2e.js     # full flow: MCP client → generate → accept → import → export
 ```
 
