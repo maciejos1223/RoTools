@@ -85,5 +85,4 @@ console.log('9. get_status →', status.content[0].text.split('\n').slice(0, 2).
 
 await client.close();
 console.log('\nE2E TESTS PASSED ✔');
-proc.kill();
 process.exit(0);
