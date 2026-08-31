@@ -18,9 +18,12 @@ const PAGES = [
   { id: 'activity', icon: ScrollText, labelKey: 'nav.activity', titleKey: 'nav.activity' },
 ];
 
-function StatusDot({ ok, title, pulse }) {
+function StatusItem({ label, ok, title, pulse }) {
   return (
-    <span className={`dot ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} title={title} />
+    <div className="flex items-center gap-2" title={title}>
+      <span className={`dot ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} />
+      <span className={`text-[12px] font-medium ${ok ? 'text-[var(--text-2)]' : 'text-[var(--text-3)]'}`}>{label}</span>
+    </div>
   );
 }
 
@@ -40,25 +43,26 @@ export default function App() {
 
   return (
     <div className="flex h-full">
-      {/* ---------- narrow sidebar (148px) ---------- */}
-      <aside className="flex w-[148px] shrink-0 flex-col border-r border-[var(--line)]">
+      {/* ---------- sidebar ---------- */}
+      <aside className="flex w-[200px] shrink-0 flex-col border-r border-[var(--line)]">
         {/* branding */}
-        <div className="flex h-[52px] items-center justify-center gap-2 border-b border-[var(--line)]">
+        <div className="flex h-[52px] items-center gap-2.5 border-b border-[var(--line)] px-4">
           <span className="h-2 w-2 rounded-full bg-[var(--lime)]" />
-          <span className="text-[13px] font-semibold tracking-tight">RoTools</span>
+          <span className="text-[13.5px] font-semibold tracking-tight">RoTools</span>
         </div>
 
         {/* nav */}
-        <nav className="flex flex-1 flex-col gap-0.5 p-2">
+        <nav className="flex flex-1 flex-col gap-0.5 p-2.5">
+          <div className="nav-section section-label">{t('nav.workspace')}</div>
           {PAGES.map((p) => {
             const badge =
-              p.id === 'models' && hasPending ? '•' : p.id === 'audio' && sfxList.length ? sfxList.length : p.id === 'assets' && assets.length ? assets.length : null;
+              p.id === 'models' && hasPending ? t('nav.pending') : p.id === 'audio' && sfxList.length ? sfxList.length : p.id === 'assets' && assets.length ? assets.length : null;
             return (
               <button key={p.id} className={`nav-item ${page === p.id ? 'on' : ''}`} onClick={() => setPage(p.id)}>
-                <p.icon size={17} strokeWidth={1.8} />
-                <span>{t(p.labelKey)}</span>
+                <p.icon size={16} strokeWidth={1.8} />
+                <span className="flex-1">{t(p.labelKey)}</span>
                 {badge && (
-                  <span className="mono tnum absolute right-2 top-2 text-[9px] leading-none text-[var(--text-3)]">
+                  <span className="mono tnum rounded-md bg-[var(--surface-3)] px-1.5 py-0.5 text-[10px] leading-4 text-[var(--text-2)]">
                     {badge}
                   </span>
                 )}
@@ -68,12 +72,13 @@ export default function App() {
         </nav>
 
         {/* bottom actions */}
-        <div className="flex flex-col items-center gap-1.5 border-t border-[var(--line)] p-2.5">
-          <button className="btn btn-ghost btn-icon" title={t('settings.title')} onClick={() => setShowSettings(true)}>
-            <Settings size={16} />
+        <div className="flex items-center gap-1.5 border-t border-[var(--line)] p-2.5">
+          <button className="btn btn-ghost btn-sm flex-1" title={t('settings.title')} onClick={() => setShowSettings(true)}>
+            <Settings size={14} />
+            {t('settings.title')}
           </button>
           <button
-            className="btn btn-ghost btn-pill mono !px-2.5 !py-1 !text-[10px]"
+            className="btn btn-ghost btn-pill mono !px-3 !py-[5px] !text-[10.5px]"
             title="Switch language / Zmień język"
             onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
           >
@@ -92,12 +97,10 @@ export default function App() {
               <span className="badge badge-lime ml-2.5 !py-[2px] align-middle">{t('nav.pendingBadge')}</span>
             )}
           </div>
-          <div className="flex items-center gap-4">
-            <StatusDot ok={!!state} title={state ? t('status.apiOk') : t('status.apiErr')} />
-            <StatusDot ok={connected} title={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
-            <span className="h-3.5 w-px bg-[var(--line)]" />
-            <StatusDot ok={!!state?.roblox?.online} title={state?.roblox?.online ? t('status.robloxOk') : t('status.robloxErr')} pulse />
-            <span className="text-[12px] text-[var(--text-3)]">Studio</span>
+          <div className="flex items-center gap-5">
+            <StatusItem label="API" ok={!!state} title={state ? t('status.apiOk') : t('status.apiErr')} />
+            <StatusItem label="Live" ok={connected} title={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
+            <StatusItem label={t('status.roblox')} ok={!!state?.roblox?.online} title={state?.roblox?.online ? t('status.robloxOk') : t('status.robloxErr')} pulse />
           </div>
         </header>
 
