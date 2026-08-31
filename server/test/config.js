@@ -60,6 +60,6 @@ try {
 
   console.log('\nCONFIG TESTS PASSED ✔');
 } finally {
-  proc.unref();
+  proc.kill();
   setTimeout(() => process.exit(0), 100).unref();
 }

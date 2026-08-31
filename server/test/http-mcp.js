@@ -45,6 +45,6 @@ scene.add(m);`,
   await client.close();
   console.log('\nHTTP MCP TESTS PASSED ✔');
 } finally {
-  proc.unref();
-  setTimeout(() => process.exit(0), 200).unref();
+  proc.kill();
+  setTimeout(() => process.exit(0), 100).unref();
 }
