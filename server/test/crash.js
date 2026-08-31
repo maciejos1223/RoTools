@@ -2,8 +2,8 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { spawn } from 'node:child_process';
 
-const BASE = 'http://localhost:7890';
-const proc = spawn('node', ['index.js'], { cwd: new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, ROTOOLS_NO_MCP: '1' } });
+const BASE = 'http://localhost:7891';
+const proc = spawn('node', ['index.js'], { cwd: new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), stdio: ['ignore', 'inherit', 'inherit'], env: { ...process.env, ROTOOLS_NO_MCP: '1', ROTOOLS_PORT: '7891' } });
 
 async function jfetch(path, opts) {
   const res = await fetch(BASE + path, {

@@ -2,7 +2,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { spawn } from 'node:child_process';
 
-const BASE = 'http://localhost:7890';
+const BASE = 'http://localhost:7891';
 
 async function jfetch(path, opts) {
   const res = await fetch(BASE + path, {
@@ -19,6 +19,7 @@ const transport = new StdioClientTransport({
   args: ['index.js'],
   cwd: new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1').replace(/\\/g, '/'),
   stderr: 'inherit',
+  env: { ...process.env, ROTOOLS_PORT: '7891' },
 });
 const client = new Client({ name: 'e2e-test', version: '1.0.0' });
 await client.connect(transport);

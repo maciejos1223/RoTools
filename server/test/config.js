@@ -1,9 +1,9 @@
 import { spawn } from 'node:child_process';
 
-const BASE = 'http://localhost:7890';
+const BASE = 'http://localhost:7891';
 
 // start server (no MCP needed)
-const proc = spawn('node', ['index.js'], { cwd: new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), stdio: ['ignore', 'ignore', 'ignore'], env: { ...process.env, ROTOOLS_NO_MCP: '1' } });
+const proc = spawn('node', ['index.js'], { cwd: new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), stdio: ['ignore', 'ignore', 'ignore'], env: { ...process.env, ROTOOLS_NO_MCP: '1', ROTOOLS_PORT: '7891' } });
 
 async function jfetch(path, opts) {
   const res = await fetch(BASE + path, {

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DEFAULTS = {
-  port: 7890,
+  port: process.env.ROTOOLS_PORT ? parseInt(process.env.ROTOOLS_PORT, 10) : 7890,
   roblox_plugin_port: 7890,
   sfx: { provider: 'elevenlabs', api_key: '', google_api_key: '', endpoint: '', voice: 'Kore', model: 'gemini-3.1-flash-tts-preview' },
   music: { provider: 'google', model: 'lyria-3-clip-preview', api_key: '', endpoint: '' },
@@ -22,9 +22,11 @@ export function loadConfig() {
   } catch {
     // missing/invalid config — use defaults
   }
+  const envPort = process.env.ROTOOLS_PORT ? parseInt(process.env.ROTOOLS_PORT, 10) : null;
   cached = {
     ...DEFAULTS,
     ...fileCfg,
+    ...(envPort && Number.isFinite(envPort) ? { port: envPort } : {}),
     sfx: { ...DEFAULTS.sfx, ...(fileCfg.sfx || {}) },
     music: { ...DEFAULTS.music, ...(fileCfg.music || {}) },
     export: { ...DEFAULTS.export, ...(fileCfg.export || {}) },

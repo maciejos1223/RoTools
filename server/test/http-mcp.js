@@ -2,10 +2,10 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { spawn } from 'node:child_process';
 
-const BASE = 'http://localhost:7890';
+const BASE = 'http://localhost:7891';
 
 // start server (HTTP only)
-const proc = spawn('node', ['index.js'], { cwd: new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), stdio: 'ignore', env: { ...process.env, ROTOOLS_NO_MCP: '1' } });
+const proc = spawn('node', ['index.js'], { cwd: new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), stdio: 'ignore', env: { ...process.env, ROTOOLS_NO_MCP: '1', ROTOOLS_PORT: '7891' } });
 
 async function waitApi() {
   for (let i = 0; i < 25; i++) {
