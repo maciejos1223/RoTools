@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, Download, Send, Loader2, PackageCheck, Wrench, X } from 'lucide-react';
+import { Copy, Check, Download, Send, Loader2, PackageCheck, Wrench, X, Cuboid } from 'lucide-react';
 import { api } from '../api.js';
 import { useI18n } from '../i18n.jsx';
 import { toast, showToastError } from '../toast.js';
