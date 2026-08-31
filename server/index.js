@@ -5,6 +5,10 @@ import { loadConfig, outputDir } from './config.js';
 const cfg = loadConfig();
 outputDir();
 
+// a local tool must survive stray errors instead of dying silently
+process.on('uncaughtException', (err) => console.error('[uncaughtException]', err));
+process.on('unhandledRejection', (err) => console.error('[unhandledRejection]', err));
+
 await startApi();
 
 console.log(`

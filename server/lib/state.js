@@ -25,7 +25,11 @@ export function activity(type, message, level = 'info') {
 export function broadcast(type, payload) {
   const data = `event: ${type}\ndata: ${JSON.stringify({ type, ...payload })}\n\n`;
   for (const res of state.sseClients) {
-    try { res.write(data); } catch { /* dropped */ }
+    if (res.destroyed || res.writableEnded) {
+      state.sseClients.delete(res);
+      continue;
+    }
+    try { res.write(data); } catch { state.sseClients.delete(res); }
   }
 }
 

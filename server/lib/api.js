@@ -30,6 +30,8 @@ export function createApi() {
     });
     res.flushHeaders?.();
     res.write(`event: hello\ndata: ${JSON.stringify({ type: 'hello' })}\n\n`);
+    // a reset socket must never crash the process
+    res.on('error', () => state.sseClients.delete(res));
     state.sseClients.add(res);
     req.on('close', () => state.sseClients.delete(res));
   });
