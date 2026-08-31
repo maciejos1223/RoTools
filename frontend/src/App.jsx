@@ -151,11 +151,29 @@ function SfxPage({ sfxList }) {
   );
 }
 
+function AutoImportToggle() {
+  const { t } = useI18n();
+  const [on, setOn] = useState(() => localStorage.getItem('rotools_autoimport') === '1');
+  const toggle = () => {
+    const v = !on;
+    setOn(v);
+    localStorage.setItem('rotools_autoimport', v ? '1' : '0');
+  };
+  return (
+    <button className={`btn btn-sm btn-pill ${on ? '!border-[rgba(239,255,0,0.5)] !text-[var(--lime)]' : ''}`} onClick={toggle}>
+      <span className={`dot !h-[6px] !w-[6px] ${on ? 'dot-ok' : 'dot-off'}`} />
+      {t('assets.autoImport')}
+    </button>
+  );
+}
+
 function AssetsPage({ assets, editRequests }) {
   const { t } = useI18n();
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <PageHeader title={t('nav.assets')} accentWord="collection" desc={t('assets.pageDesc')} />
+      <PageHeader title={t('nav.assets')} accentWord="collection" desc={t('assets.pageDesc')}>
+        <AutoImportToggle />
+      </PageHeader>
       <div className="min-h-0 flex-1">
         <AssetList assets={assets} editRequests={editRequests} />
       </div>

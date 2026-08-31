@@ -43,6 +43,7 @@ export async function importToRoblox({ modelId = null, name = null } = {}) {
     modelId: source.id,
     glbUrl: `/api/models/${source.id}/file.glb`,
     objUrl: `/api/models/${source.id}/file.obj`,
+    thumbUrl: `/api/models/${source.id}/thumb.png`,
     robloxRef: result.assetName,
     parts: result.parts,
     importedAt: new Date().toISOString(),

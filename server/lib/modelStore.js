@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildGLB, buildOBJ } from './gltf.js';
+import { renderThumbnailPNG } from './thumbnail.js';
 import { outputDir } from '../config.js';
 
 /** In-memory store of extracted model data (for export / re-import). */
@@ -30,10 +31,21 @@ export function saveModelFiles(id, name, modelData, withTextures) {
   fs.writeFileSync(path.join(dir, `${id}.mtl`), mtl);
   for (const [texName, buf] of texFiles) fs.writeFileSync(path.join(dir, texName), buf);
 
+  // thumbnail (best effort — never break generation over a preview image)
+  let thumbPath = null;
+  try {
+    thumbPath = path.join(dir, `${id}.thumb.png`);
+    fs.writeFileSync(thumbPath, renderThumbnailPNG(modelData.objects, 256));
+  } catch (err) {
+    console.error('thumbnail failed:', err.message);
+    thumbPath = null;
+  }
+
   return {
-    glbPath, objPath,
+    glbPath, objPath, thumbPath,
     glbUrl: `/api/models/${id}/file.glb`,
     objUrl: `/api/models/${id}/file.obj`,
+    thumbUrl: thumbPath ? `/api/models/${id}/thumb.png` : null,
   };
 }
 

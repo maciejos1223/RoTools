@@ -70,13 +70,23 @@ export default function ModelViewer({ pendingModel }) {
   const act = async (action, body) => {
     setBusy(action);
     try {
-      await api(`/api/models/${pendingModel.id}/${action}`, { method: 'POST', body });
+      const resp = await api(`/api/models/${pendingModel.id}/${action}`, { method: 'POST', body });
       toast(
         action === 'accept' ? t('viewer.toastAccepted') :
         action === 'reject' ? t('viewer.toastRejected') :
         t('viewer.toastRegenerating'),
         action === 'accept' ? 'success' : action === 'reject' ? 'warn' : 'info'
       );
+      // auto-import right after acceptance (optional toggle)
+      if (action === 'accept' && resp?.asset && localStorage.getItem('rotools_autoimport') === '1') {
+        toast(t('assets.toastSending'), 'info');
+        try {
+          await api(`/api/assets/${resp.asset.id}/import`, { method: 'POST' });
+          toast(t('assets.toastQueued'), 'success');
+        } catch (err) {
+          showToastError(err);
+        }
+      }
     } catch (err) {
       showToastError(err);
     } finally {

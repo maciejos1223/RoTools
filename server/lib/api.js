@@ -137,6 +137,7 @@ export function createApi() {
       modelId: m.id,
       glbUrl: m.glbUrl,
       objUrl: m.objUrl,
+      thumbUrl: m.thumbUrl || null,
       imported: false,
       createdAt: new Date().toISOString(),
     };
@@ -185,6 +186,12 @@ export function createApi() {
   };
   app.get('/api/models/:id/file.glb', serveModelFile('view', 'glb'));
   app.get('/api/models/:id/file.obj', serveModelFile('view', 'obj'));
+  app.get('/api/models/:id/thumb.png', (req, res) => {
+    const file = path.join(outputDir(), 'models', `${req.params.id}.thumb.png`);
+    if (!fs.existsSync(file)) return res.status(404).json({ error: 'No thumbnail' });
+    res.set('Content-Type', 'image/png');
+    fs.createReadStream(file).pipe(res);
+  });
 
   /* ---------- assets ---------- */
   app.post('/api/assets/:id/edit', (req, res) => {

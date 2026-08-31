@@ -65,6 +65,7 @@ const dict = {
       cancelFix: 'Cancel fix request',
       toastFixSent: 'Fix request sent — ask the AI to regenerate',
       toastFixCancelled: 'Fix request cancelled',
+      autoImport: 'Auto-import to Studio',
     },
     sfx: {
       title: 'Sound FX',
@@ -183,6 +184,7 @@ const dict = {
       cancelFix: 'Anuluj poprawkę',
       toastFixSent: 'Poprawka wysłana — poproś AI o regenerację',
       toastFixCancelled: 'Poprawka anulowana',
+      autoImport: 'Auto-import do Studio',
     },
     sfx: {
       title: 'Dźwięki',

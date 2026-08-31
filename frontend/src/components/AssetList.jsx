@@ -90,10 +90,21 @@ export default function AssetList({ assets, editRequests = [] }) {
               return (
                 <li
                   key={a.id}
-                  className="fade-up rounded-lg border border-transparent px-4 py-3.5 transition hover:border-[var(--line)] hover:bg-[var(--surface-2)]"
+                  className="fade-up flex items-center gap-3.5 rounded-lg border border-transparent px-3 py-3 transition hover:border-[var(--line)] hover:bg-[var(--surface-2)]"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0">
+                  {a.thumbUrl ? (
+                    <img
+                      src={a.thumbUrl}
+                      alt={a.name}
+                      className="h-14 w-14 shrink-0 rounded-lg border border-[var(--line)] bg-[var(--bg)] object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-[var(--line)] text-[var(--text-3)]">
+                      <Cuboid size={18} strokeWidth={1.5} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2.5">
                         <span className="truncate text-[14.5px] font-medium text-[var(--text)]">{a.name}</span>
                         {a.imported && (
@@ -153,7 +164,6 @@ export default function AssetList({ assets, editRequests = [] }) {
                         <Download size={13} /> {t('assets.download')}
                       </a>
                     </div>
-                  </div>
                   {fixingId === a.id && (
                     <div className="fade-up mt-3 flex gap-2">
                       <input
