@@ -41,6 +41,13 @@ export async function generateModel({ name, description = '', code, withTextures
     ? `\n\nNOTE — the user reviewed the previous model and left this feedback: "${state.lastFeedback}". They clicked "Regenerate" or "Reject", so adjust accordingly.`
     : '';
 
+  const editNotes = state.editRequests
+    .map((er) => `- "${er.assetName}" (${er.assetId}): "${er.feedback}"`)
+    .join('\n');
+  const editNote = editNotes
+    ? `\n\nNOTE — the user requested fixes to previously accepted assets:\n${editNotes}\nAddress this feedback in the new model.`
+    : '';
+
   return {
     modelId: id,
     name,
@@ -48,7 +55,7 @@ export async function generateModel({ name, description = '', code, withTextures
     exported: { glb: files.glbUrl, obj: files.objUrl },
     preview: 'The user can now preview this model in the local frontend. It will review and Accept/Reject/Regenerate it there.',
     resultText:
-      `Model "${name}" (${id}) generated: ${stats.objects} mesh(es), ${stats.vertices.toLocaleString()} vertices, ${stats.triangles.toLocaleString()} triangles, bounds ${stats.size.x}×${stats.size.y}×${stats.size.z}.${feedbackNote}`,
+      `Model "${name}" (${id}) generated: ${stats.objects} mesh(es), ${stats.vertices.toLocaleString()} vertices, ${stats.triangles.toLocaleString()} triangles, bounds ${stats.size.x}×${stats.size.y}×${stats.size.z}.${feedbackNote}${editNote}`,
   };
 }
 

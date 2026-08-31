@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, Download, Send, Loader2, PackageCheck, Cuboid } from 'lucide-react';
+import { Copy, Check, Download, Send, Loader2, PackageCheck, Wrench, X } from 'lucide-react';
 import { api } from '../api.js';
 import { useI18n } from '../i18n.jsx';
 import { toast, showToastError } from '../toast.js';
@@ -30,9 +30,33 @@ function CopyChip({ id }) {
   );
 }
 
-export default function AssetList({ assets }) {
+export default function AssetList({ assets, editRequests = [] }) {
   const { t } = useI18n();
   const [importing, setImporting] = useState(null);
+  const [fixingId, setFixingId] = useState(null);
+  const [fixText, setFixText] = useState('');
+
+  const submitFix = async (asset) => {
+    const feedback = fixText.trim();
+    if (!feedback) return;
+    try {
+      await api(`/api/assets/${asset.id}/edit`, { method: 'POST', body: { feedback } });
+      toast(t('assets.toastFixSent'), 'success');
+      setFixingId(null);
+      setFixText('');
+    } catch (err) {
+      showToastError(err);
+    }
+  };
+
+  const cancelFix = async (asset) => {
+    try {
+      await api(`/api/assets/${asset.id}/edit`, { method: 'DELETE' });
+      toast(t('assets.toastFixCancelled'), 'info');
+    } catch (err) {
+      showToastError(err);
+    }
+  };
 
   const importToStudio = async (asset) => {
     setImporting(asset.id);
@@ -61,50 +85,96 @@ export default function AssetList({ assets }) {
           <p className="px-4 py-12 text-center text-[13.5px] text-[var(--text-3)]">{t('assets.empty')}</p>
         ) : (
           <ul className="space-y-2">
-            {assets.map((a) => (
-              <li
-                key={a.id}
-                className="fade-up flex items-center justify-between gap-4 rounded-lg border border-transparent px-4 py-3.5 transition hover:border-[var(--line)] hover:bg-[var(--surface-2)]"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2.5">
-                    <span className="truncate text-[14.5px] font-medium text-[var(--text)]">{a.name}</span>
-                    {a.imported && (
-                      <span className="badge flex items-center gap-1 border border-[rgba(76,199,138,0.35)] text-[var(--ok)]">
-                        <PackageCheck size={10} /> {t('assets.inStudio')}
-                      </span>
-                    )}
+            {assets.map((a) => {
+              const fix = editRequests.find((e) => e.assetId === a.id);
+              return (
+                <li
+                  key={a.id}
+                  className="fade-up rounded-lg border border-transparent px-4 py-3.5 transition hover:border-[var(--line)] hover:bg-[var(--surface-2)]"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2.5">
+                        <span className="truncate text-[14.5px] font-medium text-[var(--text)]">{a.name}</span>
+                        {a.imported && (
+                          <span className="badge flex items-center gap-1 border border-[rgba(76,199,138,0.35)] text-[var(--ok)]">
+                            <PackageCheck size={10} /> {t('assets.inStudio')}
+                          </span>
+                        )}
+                        {fix && (
+                          <span className="badge badge-lime flex items-center gap-1.5">
+                            <Wrench size={9} /> {t('assets.fixRequested')}
+                            <button onClick={() => cancelFix(a)} title={t('assets.cancelFix')} className="hover:opacity-60">
+                              <X size={10} />
+                            </button>
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-2.5">
+                        <CopyChip id={a.id} />
+                        <span className="mono tnum text-[11px] text-[var(--text-3)]">
+                          {new Date(a.createdAt).toLocaleString()}
+                        </span>
+                        {a.robloxRef && (
+                          <span className="mono truncate text-[11px] text-[var(--text-3)]">
+                            {t('assets.workspace')}: <span className="text-[var(--ok)]">{a.robloxRef}</span>
+                          </span>
+                        )}
+                      </div>
+                      {fix && (
+                        <div className="mt-2 text-[12px] text-[var(--text-2)]">
+                          <Wrench size={11} className="mr-1.5 inline text-[var(--text-3)]" />
+                          {fix.feedback}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      {!fix && (
+                        <button
+                          className="btn btn-sm"
+                          onClick={() => { setFixingId(fixingId === a.id ? null : a.id); setFixText(''); }}
+                          title={t('assets.editHint')}
+                        >
+                          <Wrench size={13} /> {t('assets.edit')}
+                        </button>
+                      )}
+                      {!a.imported && (
+                        <button
+                          className="btn btn-primary btn-sm"
+                          disabled={importing === a.id}
+                          onClick={() => importToStudio(a)}
+                          title="Import into Roblox Studio"
+                        >
+                          {importing === a.id ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                          {t('assets.import')}
+                        </button>
+                      )}
+                      <a className="btn btn-sm" href={a.glbUrl} download={`${a.name}.glb`}>
+                        <Download size={13} /> {t('assets.download')}
+                      </a>
+                    </div>
                   </div>
-                  <div className="mt-1.5 flex items-center gap-2.5">
-                    <CopyChip id={a.id} />
-                    <span className="mono text-[11px] text-[var(--text-3)]">
-                      {new Date(a.createdAt).toLocaleString()}
-                    </span>
-                    {a.robloxRef && (
-                      <span className="mono truncate text-[11px] text-[var(--text-3)]">
-                        {t('assets.workspace')}: <span className="text-[var(--ok)]">{a.robloxRef}</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  {!a.imported && (
-                    <button
-                      className="btn btn-primary btn-sm"
-                      disabled={importing === a.id}
-                      onClick={() => importToStudio(a)}
-                      title="Import into Roblox Studio"
-                    >
-                      {importing === a.id ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
-                      {t('assets.import')}
-                    </button>
+                  {fixingId === a.id && (
+                    <div className="fade-up mt-3 flex gap-2">
+                      <input
+                        autoFocus
+                        value={fixText}
+                        onChange={(e) => setFixText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && submitFix(a)}
+                        placeholder={t('assets.editPlaceholder')}
+                        className="input flex-1"
+                      />
+                      <button className="btn btn-primary btn-sm" disabled={!fixText.trim()} onClick={() => submitFix(a)}>
+                        {t('assets.sendFix')}
+                      </button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => setFixingId(null)}>
+                        {t('settings.close')}
+                      </button>
+                    </div>
                   )}
-                  <a className="btn btn-sm" href={a.glbUrl} download={`${a.name}.glb`}>
-                    <Download size={13} /> {t('assets.download')}
-                  </a>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

@@ -116,7 +116,7 @@ export default function App() {
               </div>
             )}
             {page === 'audio' && <SfxPage sfxList={sfxList} />}
-            {page === 'assets' && <AssetsPage assets={assets} />}
+            {page === 'assets' && <AssetsPage assets={assets} editRequests={state?.editRequests || []} />}
             {page === 'activity' && <ActivityPage activity={activity} />}
           </div>
         </main>
@@ -151,13 +151,13 @@ function SfxPage({ sfxList }) {
   );
 }
 
-function AssetsPage({ assets }) {
+function AssetsPage({ assets, editRequests }) {
   const { t } = useI18n();
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader title={t('nav.assets')} accentWord="collection" desc={t('assets.pageDesc')} />
       <div className="min-h-0 flex-1">
-        <AssetList assets={assets} />
+        <AssetList assets={assets} editRequests={editRequests} />
       </div>
     </div>
   );

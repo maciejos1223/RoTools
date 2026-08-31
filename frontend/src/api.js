@@ -34,7 +34,7 @@ export function useAppState() {
     const es = new EventSource('/api/events');
     es.onopen = () => setConnected(true);
     es.onerror = () => setConnected(false);
-    const events = ['model', 'asset', 'sfx', 'import', 'roblox', 'activity'];
+    const events = ['model', 'asset', 'sfx', 'import', 'roblox', 'activity', 'edit'];
     events.forEach((name) => es.addEventListener(name, () => setTimeout(refresh, 30)));
     return () => es.close();
   }, [refresh]);

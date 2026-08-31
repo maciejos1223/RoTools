@@ -187,6 +187,39 @@ export function createApi() {
   app.get('/api/models/:id/file.obj', serveModelFile('view', 'obj'));
 
   /* ---------- assets ---------- */
+  app.post('/api/assets/:id/edit', (req, res) => {
+    const asset = state.assets.find((a) => a.id === req.params.id);
+    if (!asset) return res.status(404).json({ error: 'Asset not found' });
+    const feedback = String(req.body?.feedback || '').trim();
+    if (!feedback) return res.status(400).json({ error: 'feedback required' });
+    let request = state.editRequests.find((e) => e.assetId === asset.id);
+    if (request) {
+      request.feedback = feedback;
+      request.createdAt = new Date().toISOString();
+    } else {
+      request = {
+        id: `edt_${randomUUID().slice(0, 8)}`,
+        assetId: asset.id,
+        assetName: asset.name,
+        feedback,
+        createdAt: new Date().toISOString(),
+      };
+      state.editRequests.unshift(request);
+    }
+    broadcast('edit', { action: 'requested', request });
+    activity('model', `Fix requested for "${asset.name}": "${feedback}"`, 'info');
+    res.json({ ok: true, request });
+  });
+
+  app.delete('/api/assets/:id/edit', (req, res) => {
+    const idx = state.editRequests.findIndex((e) => e.assetId === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'No edit request for this asset' });
+    const [request] = state.editRequests.splice(idx, 1);
+    broadcast('edit', { action: 'cancelled', request });
+    activity('model', `Fix request for "${request.assetName}" cancelled`, 'info');
+    res.json({ ok: true });
+  });
+
   app.post('/api/assets/:id/import', async (req, res) => {
     const asset = state.assets.find((a) => a.id === req.params.id);
     if (!asset) return res.status(404).json({ error: 'Asset not found' });

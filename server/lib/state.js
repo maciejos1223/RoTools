@@ -9,6 +9,7 @@ export const state = {
   sfx: [],
   imports: [],
   activity: [],
+  editRequests: [],
   lastFeedback: null,
   sseClients: new Set(),
 };
@@ -43,5 +44,6 @@ export function publicState() {
     sfx: state.sfx,
     imports: state.imports.slice(-20),
     activity: state.activity.slice(-100),
+    editRequests: state.editRequests,
   };
 }

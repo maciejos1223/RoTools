@@ -112,6 +112,9 @@ export function createMcpServer() {
         `Roblox Studio plugin: ${state.roblox.online ? `connected (${state.roblox.studioVersion || 'unknown version'})` : 'NOT connected'}`,
         `Pending model: ${p ? `${p.name} (${p.id}) — status: ${p.status}` : 'none'}`,
         `Accepted assets: ${state.assets.length}`,
+        state.editRequests.length
+          ? `Pending fix requests (user wants changes to these assets):\n${state.editRequests.map((er) => `  - "${er.assetName}" (${er.assetId}): "${er.feedback}"`).join('\n')}`
+          : 'Pending fix requests: none',
         `SFX generated: ${state.sfx.length}`,
         `Recent activity:`,
         ...state.activity.slice(-5).map((a) => `  [${a.level}] ${a.message}`),
