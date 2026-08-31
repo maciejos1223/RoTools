@@ -8,37 +8,19 @@ import ActivityLog from './components/ActivityLog.jsx';
 import Toasts from './components/Toasts.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
 import {
-  Box, Volume2, Package, ScrollText, Settings,
+  Box, Volume2, Package, ScrollText, Settings, Languages,
 } from 'lucide-react';
 
 const PAGES = [
-  { id: 'models', icon: Box, labelKey: 'nav.models' },
-  { id: 'audio', icon: Volume2, labelKey: 'nav.audio' },
-  { id: 'assets', icon: Package, labelKey: 'nav.assets' },
-  { id: 'activity', icon: ScrollText, labelKey: 'nav.activity' },
+  { id: 'models', icon: Box, labelKey: 'nav.models', titleKey: 'nav.models' },
+  { id: 'audio', icon: Volume2, labelKey: 'nav.audio', titleKey: 'nav.audio' },
+  { id: 'assets', icon: Package, labelKey: 'nav.assets', titleKey: 'nav.assets' },
+  { id: 'activity', icon: ScrollText, labelKey: 'nav.activity', titleKey: 'nav.activity' },
 ];
 
-function NavItem({ icon: Icon, label, active, onClick, badge }) {
+function StatusDot({ ok, title, pulse }) {
   return (
-    <button className={`nav-item ${active ? 'on' : ''}`} onClick={onClick}>
-      <Icon size={16} className="shrink-0" style={active ? { color: 'var(--primary)' } : undefined} />
-      <span className="flex-1">{label}</span>
-      {badge && (
-        <span className="mono tnum rounded-md bg-[var(--surface-3)] px-1.5 py-0.5 text-[10.5px] leading-4 text-[var(--text-2)]">
-          {badge}
-        </span>
-      )}
-    </button>
-  );
-}
-
-function StatusRow({ label, ok, value, title, pulse }) {
-  return (
-    <div className="flex items-center gap-2.5 px-3 py-[7px]" title={title}>
-      <span className={`dot !h-[7px] !w-[7px] ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} />
-      <span className="text-[12px] text-[var(--text-2)]">{label}</span>
-      <span className="mono tnum ml-auto text-[11px] text-[var(--text-3)]">{value}</span>
-    </div>
+    <span className={`dot ${ok ? 'dot-ok' : 'dot-off'} ${pulse && ok ? 'dot-live' : ''}`} title={title} />
   );
 }
 
@@ -53,83 +35,89 @@ export default function App() {
   const sfxList = state?.sfx || [];
   const activity = state?.activity || [];
 
-  const badges = { models: 0, audio: sfxList.length, assets: assets.length, activity: 0 };
   const hasPending = pending?.status === 'pending';
+  const activePage = PAGES.find((p) => p.id === page);
 
   return (
     <div className="flex h-full">
-      {/* ---------- sidebar ---------- */}
-      <aside className="flex w-[232px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--surface)]">
-        <div className="flex h-[62px] items-center gap-3 border-b border-[var(--line)] px-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
-            <Box size={15} className="text-white" strokeWidth={2.2} />
-          </div>
-          <div className="leading-tight">
-            <div className="text-[14px] font-semibold tracking-tight">RoTools</div>
-            <div className="text-[10.5px] text-[var(--text-3)]">{t('app.subtitle')}</div>
-          </div>
+      {/* ---------- narrow sidebar (148px) ---------- */}
+      <aside className="flex w-[148px] shrink-0 flex-col border-r border-[var(--line)]">
+        {/* branding */}
+        <div className="flex h-[52px] items-center justify-center gap-2 border-b border-[var(--line)]">
+          <span className="h-2 w-2 rounded-full bg-[var(--lime)]" />
+          <span className="text-[13px] font-semibold tracking-tight">RoTools</span>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-0.5 p-3">
-          <div className="nav-section section-label">{t('nav.workspace')}</div>
-          {PAGES.map((p) => (
-            <NavItem
-              key={p.id}
-              icon={p.icon}
-              label={t(p.labelKey)}
-              active={page === p.id}
-              onClick={() => setPage(p.id)}
-              badge={p.id === 'models' && hasPending ? t('nav.pending') : badges[p.id] > 0 ? badges[p.id] : null}
-            />
-          ))}
+        {/* nav */}
+        <nav className="flex flex-1 flex-col gap-0.5 p-2">
+          {PAGES.map((p) => {
+            const badge =
+              p.id === 'models' && hasPending ? '•' : p.id === 'audio' && sfxList.length ? sfxList.length : p.id === 'assets' && assets.length ? assets.length : null;
+            return (
+              <button key={p.id} className={`nav-item ${page === p.id ? 'on' : ''}`} onClick={() => setPage(p.id)}>
+                <p.icon size={17} strokeWidth={1.8} />
+                <span>{t(p.labelKey)}</span>
+                {badge && (
+                  <span className="mono tnum absolute right-2 top-2 text-[9px] leading-none text-[var(--text-3)]">
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="border-t border-[var(--line)] p-3">
-          <div className="rounded-xl border border-[var(--line)] bg-[var(--bg)] py-1">
-            <StatusRow label={t('status.api')} ok={!!state} value={state ? 'online' : 'offline'} title={state ? t('status.apiOk') : t('status.apiErr')} />
-            <StatusRow label="SSE" ok={connected} value={connected ? 'live' : 'offline'} title={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
-            <StatusRow label="Studio" ok={!!state?.roblox?.online} value={state?.roblox?.online ? 'connected' : 'offline'} title={state?.roblox?.online ? t('status.robloxOk') : t('status.robloxErr')} pulse />
-          </div>
-          <div className="mt-2.5 flex gap-1.5">
-            <button className="btn btn-sm flex-1" onClick={() => setShowSettings(true)}>
-              <Settings size={13} />
-              {t('settings.title')}
-            </button>
-            <button
-              className="btn btn-sm w-[38px] !px-0 mono !text-[11px]"
-              title="Switch language / Zmień język"
-              onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
-            >
-              {lang.toUpperCase()}
-            </button>
-          </div>
+        {/* bottom actions */}
+        <div className="flex flex-col items-center gap-1.5 border-t border-[var(--line)] p-2.5">
+          <button className="btn btn-ghost btn-icon" title={t('settings.title')} onClick={() => setShowSettings(true)}>
+            <Settings size={16} />
+          </button>
+          <button
+            className="btn btn-ghost btn-pill mono !px-2.5 !py-1 !text-[10px]"
+            title="Switch language / Zmień język"
+            onClick={() => setLang(lang === 'en' ? 'pl' : 'en')}
+          >
+            {lang.toUpperCase()}
+          </button>
         </div>
       </aside>
 
-      {/* ---------- content ---------- */}
-      <main className="min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto h-full p-5" style={{ maxWidth: 1400 }}>
-          {page === 'models' && (
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="mb-4 flex items-center justify-between">
-                <h1 className="text-[19px] font-semibold tracking-tight">{t('nav.models')}</h1>
-                {pending && (
-                  <span className={`badge border ${pending.status === 'pending' ? 'border-[rgba(110,121,244,0.4)] text-[var(--primary)]' : 'border-[var(--line)] text-[var(--text-3)]'}`}>
-                    {pending.status === 'pending' ? t('nav.pendingBadge') : pending.status}
-                  </span>
-                )}
+      {/* ---------- top bar + content ---------- */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* compact top bar */}
+        <header className="flex h-[48px] shrink-0 items-center justify-between border-b border-[var(--line)] px-6">
+          <div className="text-[13px] font-semibold tracking-tight text-[var(--text-2)]">
+            {t(activePage.titleKey)}
+            {page === 'models' && hasPending && (
+              <span className="badge badge-lime ml-2.5 !py-[2px] align-middle">{t('nav.pendingBadge')}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            <StatusDot ok={!!state} title={state ? t('status.apiOk') : t('status.apiErr')} />
+            <StatusDot ok={connected} title={connected ? t('status.liveOk') : t('status.liveErr')} pulse />
+            <span className="h-3.5 w-px bg-[var(--line)]" />
+            <StatusDot ok={!!state?.roblox?.online} title={state?.roblox?.online ? t('status.robloxOk') : t('status.robloxErr')} pulse />
+            <span className="text-[12px] text-[var(--text-3)]">Studio</span>
+          </div>
+        </header>
+
+        {/* main */}
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="mx-auto h-full max-w-[1080px] px-8 py-7">
+            {page === 'models' && (
+              <div className="flex h-full min-h-0 flex-col">
+                <ModelViewer pendingModel={pending || null} />
+                <div className="mt-5 h-[230px] shrink-0">
+                  <ActivityLog activity={activity} onClear={() => {}} />
+                </div>
               </div>
-              <ModelViewer pendingModel={pending || null} />
-              <div className="mt-4 h-[220px] shrink-0">
-                <ActivityLog activity={activity} onClear={() => {}} />
-              </div>
-            </div>
-          )}
-          {page === 'audio' && <SfxPage sfxList={sfxList} />}
-          {page === 'assets' && <AssetsPage assets={assets} />}
-          {page === 'activity' && <ActivityPage activity={activity} />}
-        </div>
-      </main>
+            )}
+            {page === 'audio' && <SfxPage sfxList={sfxList} />}
+            {page === 'assets' && <AssetsPage assets={assets} />}
+            {page === 'activity' && <ActivityPage activity={activity} />}
+          </div>
+        </main>
+      </div>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       <Toasts />
@@ -137,14 +125,13 @@ export default function App() {
   );
 }
 
-function PageHeader({ title, desc, children }) {
+function PageHeader({ title, desc, accentWord, children }) {
   return (
-    <div className="mb-5 flex items-end justify-between gap-4">
-      <div>
-        <h1 className="text-[19px] font-semibold tracking-tight">{title}</h1>
-        {desc && <p className="mt-0.5 text-[13px] text-[var(--text-3)]">{desc}</p>}
-      </div>
-      {children}
+    <div className="mb-7">
+      <h1 className="text-[24px] font-bold tracking-tight">
+        {title} {accentWord && <span className="serif-accent text-[var(--text-2)]">{accentWord}</span>}
+      </h1>
+      {desc && <p className="serif-accent mt-1 text-[15px] text-[var(--text-3)]">{desc}</p>}
     </div>
   );
 }
@@ -153,7 +140,7 @@ function SfxPage({ sfxList }) {
   const { t } = useI18n();
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <PageHeader title={t('nav.audio')} desc={t('audio.pageDesc')} />
+      <PageHeader title={t('nav.audio')} accentWord="studio" desc={t('audio.pageDesc')} />
       <div className="min-h-0 flex-1">
         <SfxPanel sfxList={sfxList} />
       </div>
@@ -165,7 +152,7 @@ function AssetsPage({ assets }) {
   const { t } = useI18n();
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <PageHeader title={t('nav.assets')} desc={t('assets.pageDesc')} />
+      <PageHeader title={t('nav.assets')} accentWord="collection" desc={t('assets.pageDesc')} />
       <div className="min-h-0 flex-1">
         <AssetList assets={assets} />
       </div>
@@ -177,7 +164,7 @@ function ActivityPage({ activity }) {
   const { t } = useI18n();
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <PageHeader title={t('nav.activity')} desc={t('log.pageDesc')} />
+      <PageHeader title={t('nav.activity')} accentWord="feed" desc={t('log.pageDesc')} />
       <div className="min-h-0 flex-1">
         <ActivityLog activity={activity} onClear={() => {}} full />
       </div>

@@ -88,12 +88,12 @@ export default function ModelViewer({ pendingModel }) {
     <div className="panel relative min-h-[420px] flex-1 overflow-hidden">
       {url ? (
         <Canvas shadows dpr={[1, 2]} camera={{ position: [4.5, 3, 4.5], fov: 42 }}>
-          <color attach="background" args={['#1a1a1c']} />
-          <fog attach="fog" args={['#1a1a1c', 20, 46]} />
+          <color attach="background" args={['#212226']} />
+          <fog attach="fog" args={['#212226', 20, 46]} />
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 8, 4]} intensity={1.5} castShadow shadow-mapSize={[1024, 1024]} />
-          <pointLight position={[-6, 3, -4]} intensity={10} color="#9aa1f8" />
-          <pointLight position={[6, 2, -6]} intensity={8} color="#c8c8cc" />
+          <pointLight position={[-6, 3, -4]} intensity={10} color="#cfd2ff" />
+          <pointLight position={[6, 2, -6]} intensity={8} color="#ffffff" />
           <Suspense fallback={null}>
             <Model url={url} showTextures={showTextures} wireframe={wireframe} />
           </Suspense>
@@ -103,10 +103,10 @@ export default function ModelViewer({ pendingModel }) {
             args={[40, 40]}
             cellSize={0.6}
             cellThickness={0.6}
-            cellColor="#262629"
+            cellColor="#2e2f34"
             sectionSize={3}
             sectionThickness={1}
-            sectionColor="#333338"
+            sectionColor="#3b3c42"
             fadeDistance={34}
             fadeStrength={1.4}
             infiniteGrid
@@ -230,12 +230,14 @@ function EmptyState() {
   const { t } = useI18n();
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--line)] text-[var(--text-3)]">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--line)] text-[var(--text-3)]">
         <Box size={26} strokeWidth={1.5} />
       </div>
       <div>
-        <div className="text-[14px] font-medium text-[var(--text-2)]">{t('viewer.emptyTitle')}</div>
-        <div className="mx-auto mt-1 max-w-[380px] text-[13px] leading-relaxed text-[var(--text-3)]">
+        <div className="text-[17px] font-bold tracking-tight">
+          {t('viewer.emptyTitle')} <span className="serif-accent font-normal text-[var(--text-2)]">{t('viewer.emptyAccent')}</span>
+        </div>
+        <div className="mx-auto mt-1.5 max-w-[400px] text-[13.5px] leading-relaxed text-[var(--text-3)]">
           {t('viewer.emptyDesc')} <span className="text-[var(--text-2)]">{t('viewer.emptyExample')}</span>
           {t('viewer.emptySuffix')}
         </div>
